@@ -26,7 +26,7 @@ class _PageViewDemoState extends State<Second> {
       <Widget>[
         Fourth.Fourth(),
         Fifth.Fifth(),
-        MyHomePage.MyHomePage(),
+        MyHomePage.Sixth(),
         Container(
           color: Colors.pink,
         ),

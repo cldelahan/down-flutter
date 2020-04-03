@@ -5,6 +5,35 @@ import 'package:flutter/cupertino.dart';
 // For changing the language
 // ...
 
+class Sixth extends StatelessWidget {
+  final formKey = GlobalKey<FormState>();
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        backgroundColor: Colors.white,
+        body: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              BasicTimeField(),
+              //SizedBox(height: 24),
+        RaisedButton(
+          child: Text('Save'),
+          onPressed: () => formKey.currentState.save(),
+        ),
+        RaisedButton(
+          child: Text('Reset'),
+          onPressed: () => formKey.currentState.reset(),
+        ),
+        RaisedButton(
+            child: Text('Validate'),
+            onPressed: () => formKey.currentState.validate(),
+        )]
+        )
+    );
+  }
+}
+
+
 class MyHomePage extends StatefulWidget {
   @override
   MyHomePageState createState() => MyHomePageState();
