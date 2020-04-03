@@ -6,6 +6,8 @@ import './BurgerPage.dart' as third;
 //void main() => runApp(MyApp());
 
 const color1 = const Color(0xff26c586);
+const transColor = Color(0x00000000);
+
 
 void main() {
   runApp(new MaterialApp(
@@ -77,13 +79,33 @@ class MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
 
         ),
         bottomNavigationBar: new Material(
-            color: color1,
+            color: transColor,
             child: new TabBar(
                 controller: controller,
                 tabs: <Tab>[
-                  new Tab(icon: new Icon(Icons.home)),
-                  new Tab(icon: new Icon(Icons.arrow_downward)),
-                  new Tab(icon: new Icon(Icons.group)),
+                  new Tab(child: new IconTheme(
+                    data: new IconThemeData(
+                        color: color1),
+                    child: new Icon(Icons.home),
+                  ),),
+                  new Tab(child: new IconTheme(
+                    data: new IconThemeData(
+                        color: color1),
+                    child: new Icon(Icons.arrow_downward),
+                  ),),
+                  new Tab(child: new IconTheme(
+                    data: new IconThemeData(
+                        color: color1),
+                    child: new Icon(Icons.group),
+                  ),),
+          
+
+                  //child: new IconTheme(
+                  //    data: new IconThemeData(
+                  //        color: Colors.yellow),
+                  //    child: new Icon(Icons.home),
+                  //),
+                  //new Tab(icon: new Icon(Icons.home)),
                 ]
             )
         ),
