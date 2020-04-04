@@ -21,7 +21,7 @@ class _HomePageState extends State<HomePage> {
   Widget buildHomeScreen() {
     return new MyTabs();
     /*runApp(new MaterialApp(
-      home: new MyTabs()
+      home: new MyTabs()cont
     ));*/
   }
 
