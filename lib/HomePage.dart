@@ -8,7 +8,7 @@ import './BurgerPage.dart' as third;
 
 const color1 = const Color(0xff26c586);
 const transColor = Color(0x00000000);
-final GoogleSignIn gSignIn = GoogleSignIn();
+
 
 class HomePage extends StatefulWidget {
   @override
@@ -69,23 +69,15 @@ class _HomePageState extends State<HomePage> {
   Scaffold buildSignInScreen() {
     return Scaffold(
       body: Container (
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topRight,
-            end: Alignment.bottomLeft,
-            colors: [Theme.of(context).accentColor, Theme.of(context).primaryColor],
-          )
-        ),
-        alignment: Alignment.center,
         child: Column (
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget> [
             Text ("Down",
-            style: TextStyle(fontSize: 92.0, color: Colors.white, fontFamily: "Signatra"),
+            style: TextStyle(fontSize: 92.0, color: color1, fontFamily: "Signatra"),
             ),
             GestureDetector(
-              onTap: ()=> loginUser(),
+              onTap: ()=> "button tapped",
               child: Container(
                 width: 270.0,
                 height: 65.0,
@@ -137,6 +129,11 @@ class MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
+        appBar: new AppBar(
+            title: new Text("Down"),
+            backgroundColor: color1,
+
+        ),
         bottomNavigationBar: new Material(
             color: transColor,
             child: new TabBar(
