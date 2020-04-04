@@ -26,6 +26,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         // put theme data and colors here
         primarySwatch: Colors.blue,
+        primaryColor: Color(0xff26c586),
+        accentColor: Color(0xff17a68b)
       ),
       home: HomePage(),
     );

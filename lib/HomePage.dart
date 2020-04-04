@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import './FeedPage.dart' as first;
 import './DownPage1.dart' as second;
 import './BurgerPage.dart' as third;
@@ -7,7 +8,7 @@ import './BurgerPage.dart' as third;
 
 const color1 = const Color(0xff26c586);
 const transColor = Color(0x00000000);
-
+final GoogleSignIn gSignIn = GoogleSignIn();
 
 class HomePage extends StatefulWidget {
   @override
@@ -18,25 +19,73 @@ class _HomePageState extends State<HomePage> {
   // keeping track if user is signed in
   bool isSignedIn = false;
 
+  void initState() {
+    super.initState();
+
+    // if the user changes, try signing in with the account
+    gSignIn.onCurrentUserChanged.listen((gSignInAccount) {
+      controlSignIn(gSignIn);
+    }, onError: (gError) {
+      print("Error Message:" + gError);
+    });
+
+    // if the user is already signed in, then let them sign in
+    gSignIn.signInSilently(suppressErrors: false).then((gSignInAccount) {
+      controlSignIn(gSignIn);
+    }).catchError((gError) {
+      print("Error Message: " + gError);
+    });
+  }
+
+  controlSignIn(GoogleSignIn signInAccount) async {
+    if(signInAccount != null) {
+      // create user account
+      setState(() {
+        isSignedIn = true;
+      });
+    } else {
+      setState((){
+        isSignedIn  = false;
+      });
+    }
+  }
+
+  loginUser() {
+    // signin user
+    gSignIn.signIn();
+    // if they are signed in - we need to check firebase
+    // and switch pages
+  }
+
+  logoutUser() {
+    gSignIn.signOut();
+  }
+
   Widget buildHomeScreen() {
+    //return RaisedButton.icon(onPressed: null, icon: Icon(Icons.close), label: Text("Sign Out"));
     return new MyTabs();
-    /*runApp(new MaterialApp(
-      home: new MyTabs()
-    ));*/
   }
 
   Scaffold buildSignInScreen() {
     return Scaffold(
       body: Container (
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topRight,
+            end: Alignment.bottomLeft,
+            colors: [Theme.of(context).accentColor, Theme.of(context).primaryColor],
+          )
+        ),
+        alignment: Alignment.center,
         child: Column (
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget> [
             Text ("Down",
-            style: TextStyle(fontSize: 92.0, color: color1, fontFamily: "Signatra"),
+            style: TextStyle(fontSize: 92.0, color: Colors.white, fontFamily: "Signatra"),
             ),
             GestureDetector(
-              onTap: ()=> "button tapped",
+              onTap: ()=> loginUser(),
               child: Container(
                 width: 270.0,
                 height: 65.0,
@@ -88,11 +137,6 @@ class MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-        appBar: new AppBar(
-            title: new Text("Down"),
-            backgroundColor: color1,
-
-        ),
         bottomNavigationBar: new Material(
             color: transColor,
             child: new TabBar(
