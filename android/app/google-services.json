@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "283526864286",
+    "firebase_url": "https://down-flutter.firebaseio.com",
+    "project_id": "down-flutter",
+    "storage_bucket": "down-flutter.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:283526864286:android:d0faa2d25cf42015ba0a8f",
+        "android_client_info": {
+          "package_name": "com.down"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "283526864286-jkicncja5752v5jinjslumn3tk4uphvh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.down",
+            "certificate_hash": "3db5ad14e9b9aa3d13f0bf347f254eac4a88945d"
+          }
+        },
+        {
+          "client_id": "283526864286-2i437q044lf5lnjllvi6e9k010rvbtim.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC0mlqNWHtL79N4DKhDUr2acRkREyTHI3o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "283526864286-2i437q044lf5lnjllvi6e9k010rvbtim.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "283526864286-dg8om4hgpfnk0mikc043gjuuucv9rgm5.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.down"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
