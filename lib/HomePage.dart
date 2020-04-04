@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import './CreateAccountPage.dart';
+import './User.dart';
 import './FeedPage.dart' as first;
 import './DownPage1.dart' as second;
 import './BurgerPage.dart' as third;
@@ -9,6 +12,10 @@ import './BurgerPage.dart' as third;
 const color1 = const Color(0xff26c586);
 const transColor = Color(0x00000000);
 final GoogleSignIn gSignIn = GoogleSignIn();
+final usersReference = Firestore.instance.collection("users");
+User currentUser;
+
+final DateTime timestamp = DateTime.now();
 
 class HomePage extends StatefulWidget {
   @override
@@ -39,7 +46,8 @@ class _HomePageState extends State<HomePage> {
 
   controlSignIn(GoogleSignIn signInAccount) async {
     if(signInAccount != null) {
-      // create user account
+      // create user account in firebase
+      await saveUserInfoToFireStore();
       setState(() {
         isSignedIn = true;
       });
@@ -49,6 +57,30 @@ class _HomePageState extends State<HomePage> {
       });
     }
   }
+
+  saveUserInfoToFireStore() async {
+    final GoogleSignInAccount gCurrentUser = gSignIn.currentUser;
+    // get the snapshot of data from firebase user
+    DocumentSnapshot documentSnapshot = await usersReference.document(gCurrentUser.id).get();
+    // if they do not have an account
+    if (!documentSnapshot.exists) {
+      final username = await Navigator.push(context, MaterialPageRoute(builder: (context) => CreateAccountPage()));
+      usersReference.document(gCurrentUser.id).setData({
+        "id": gCurrentUser.id,
+        "profileName": gCurrentUser.displayName,
+        "userName": gCurrentUser,
+        "url": gCurrentUser.photoUrl,
+        "email": gCurrentUser.email,
+        "bio": "",
+        "timestamp": timestamp
+      });
+
+      documentSnapshot = await usersReference.document(gCurrentUser.id).get();
+    }
+
+    currentUser = User.fromDocument(documentSnapshot);
+  }
+
 
   loginUser() {
     // signin user
