@@ -24,7 +24,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   // keeping track if user is signed in
-  bool isSignedIn = false;
+  bool isSignedIn = true;
 
   void initState() {
     super.initState();
