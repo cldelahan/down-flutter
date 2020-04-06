@@ -7,6 +7,8 @@ import './User.dart';
 import './FeedPage.dart' as first;
 import './DownPage1.dart' as second;
 import './BurgerPage.dart' as third;
+import './UploadPage.dart';
+import './SearchPage.dart';
 
 
 const color1 = const Color(0xff26c586);
@@ -25,6 +27,8 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   // keeping track if user is signed in
   bool isSignedIn = true;
+  PageController pageController;
+  int getPageIndex = 0;
 
   void initState() {
     super.initState();
@@ -33,14 +37,14 @@ class _HomePageState extends State<HomePage> {
     gSignIn.onCurrentUserChanged.listen((gSignInAccount) {
       controlSignIn(gSignIn);
     }, onError: (gError) {
-      print("Error Message:" + gError);
+      print("Error Message:" + gError.toString());
     });
 
     // if the user is already signed in, then let them sign in
     gSignIn.signInSilently(suppressErrors: false).then((gSignInAccount) {
       controlSignIn(gSignIn);
     }).catchError((gError) {
-      print("Error Message: " + gError);
+      print("Error Message: " + gError.toString());
     });
   }
 
@@ -68,7 +72,7 @@ class _HomePageState extends State<HomePage> {
       usersReference.document(gCurrentUser.id).setData({
         "id": gCurrentUser.id,
         "profileName": gCurrentUser.displayName,
-        "userName": gCurrentUser,
+        "userName": username,
         "url": gCurrentUser.photoUrl,
         "email": gCurrentUser.email,
         "bio": "",
@@ -81,6 +85,10 @@ class _HomePageState extends State<HomePage> {
     currentUser = User.fromDocument(documentSnapshot);
   }
 
+  void dispose() {
+    pageController.dispose();
+    super.dispose();
+  }
 
   loginUser() {
     // signin user
@@ -157,7 +165,7 @@ class MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    controller = new TabController(vsync: this, length: 3);
+    controller = new TabController(vsync: this, length: 5);
   }
 
   @override
@@ -189,7 +197,16 @@ class MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
                         color: color1),
                     child: new Icon(Icons.group),
                   ),),
-
+                  new Tab(child: new IconTheme(
+                    data: new IconThemeData(
+                    color: color1),
+                    child: new Icon(Icons.image),
+                    ),),
+                  new Tab(child: new IconTheme(
+                    data: new IconThemeData(
+                        color: color1),
+                    child: new Icon(Icons.search),
+                  ),)
 
                   //child: new IconTheme(
                   //    data: new IconThemeData(
@@ -205,7 +222,9 @@ class MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
             children: <Widget>[
               new first.First(),
               new second.Second(),
-              new third.Third()
+              new third.Third(),
+              new UploadPage(),
+              new SearchPage()
             ]
         )
     );
