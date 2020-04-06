@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import './HomePage.dart';
-import './FeedPage.dart' as first;
-import './DownPage1.dart' as second;
-import './BurgerPage.dart' as third;
+import 'package:down/Pages/HomePage.dart';
 
 //void main() => runApp(MyApp());
 

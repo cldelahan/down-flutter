@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import './CreateAccountPage.dart';
-import './User.dart';
-import './FeedPage.dart' as first;
-import './DownPage1.dart' as second;
-import './BurgerPage.dart' as third;
+import 'package:down/Pages/CreateAccountPage.dart';
+import '../Models/User.dart';
+import 'package:down/Pages/FeedPage.dart' as first;
+import 'package:down/Pages/DownPage1.dart' as second;
+import 'package:down/Pages/BurgerPage.dart' as third;
 import './UploadPage.dart';
 import './SearchPage.dart';
 

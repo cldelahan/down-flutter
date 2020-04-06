@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import './HeaderWidget.dart';
+import '../Widgets/HeaderWidget.dart';
 
 class CreateAccountPage extends StatefulWidget {
   @override

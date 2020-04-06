@@ -1,9 +1,9 @@
 
 import 'package:flutter/material.dart';
-import './HeaderWidget.dart';
-import './DownCreation/MakeDownHome.dart' as Fourth;
-import './DownCreation/MakeDownActivity.dart' as Fifth;
-import './DownCreation/MakeDownTime.dart' as MyHomePage;
+import '../Widgets/HeaderWidget.dart';
+import '../DownCreation/MakeDownHome.dart' as Fourth;
+import '../DownCreation/MakeDownActivity.dart' as Fifth;
+import '../DownCreation/MakeDownTime.dart' as MyHomePage;
 
 class Second extends StatefulWidget {
   @override

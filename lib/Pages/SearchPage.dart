@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import './ProgressWidget.dart';
-import './HomePage.dart';
-import './User.dart';
+import 'package:down/Widgets/ProgressWidget.dart';
+import 'package:down/Pages/HomePage.dart';
+import 'package:down/Models/User.dart';
 
 class SearchPage extends StatefulWidget {
   @override
