@@ -9,6 +9,7 @@ import 'package:down/Pages/DownPage1.dart' as second;
 import 'package:down/Pages/BurgerPage.dart' as third;
 import './UploadPage.dart';
 import './SearchPage.dart';
+import '../Widgets/MyApp.dart';
 
 
 const color1 = const Color(0xff26c586);
@@ -223,7 +224,7 @@ class MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
               new first.First(),
               new second.Second(),
               new third.Third(),
-              new UploadPage(),
+              new MyApp(),
               new SearchPage()
             ]
         )
