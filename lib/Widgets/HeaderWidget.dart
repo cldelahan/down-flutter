@@ -58,7 +58,7 @@ AppBar header(context, {bool isAppTitle, String strTitle, bool incProfile=false,
         },
         child: Text("Profile"),
         shape: CircleBorder(side: BorderSide(color: Colors.transparent)),
-      )
+      ),
     ],
   );
 }

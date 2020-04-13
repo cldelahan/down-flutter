@@ -13,6 +13,8 @@ class Down {
   final String title;
   final String address;
   final String advertId;
+  // isDown shouldn't normally be stored here
+  bool isDown = false;
 
   Down({
     this.id,
@@ -24,7 +26,8 @@ class Down {
     this.timeCreated,
     this.title,
     this.address,
-    this.advertId
+    this.advertId,
+    this.isDown
   });
 
   String getCleanTime() {

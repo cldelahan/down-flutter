@@ -23,6 +23,7 @@ Widget settingsPage (context, User userInfo, bool isSelf) {
               textColor: Colors.white,
               child: Text("Profile"),
               shape: CircleBorder(side: BorderSide(color: Colors.transparent)),
+              onPressed: () {},
             ),
         ]
         ),
