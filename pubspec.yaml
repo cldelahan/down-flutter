@@ -54,5 +54,8 @@ flutter:
     - family: Signatra
       fonts:
         - asset: assets/fonts/Signatra.ttf
+    - family: Lato
+      fonts:
+        - asset: assets/fonts/Lato.ttf
   assets:
     - assets/images/google_signin_button.png

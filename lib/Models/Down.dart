@@ -13,6 +13,7 @@ class Down {
   final String title;
   final String address;
   final String advertId;
+  final int nSeen;
   // isDown shouldn't normally be stored here
   bool isDown = false;
 
@@ -27,7 +28,8 @@ class Down {
     this.title,
     this.address,
     this.advertId,
-    this.isDown
+    this.isDown,
+    this.nSeen
   });
 
   String getCleanTime() {
@@ -44,6 +46,12 @@ class Down {
     }
 
     return todayOrTom + "  " + hour+ ":" + minute + " " + amPm;
+  }
+
+  String getGoingSummary() {
+    int nNotSeen = nInvited - nSeen;
+    return nDown.toString() + " Down ~ " + nNotSeen.toString() + " Haven't Seen ~ " +
+      nInvited.toString() + " Invited";
   }
 
   factory Down.fromDocument(DocumentSnapshot doc) {
