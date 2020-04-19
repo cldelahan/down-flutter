@@ -12,7 +12,7 @@ Widget downEntry(context, Down down, int num) {
               context,
               MaterialPageRoute(
                 builder: (context) {
-                 return new DownEntryDetails(num: num);
+                 return new DownEntryDetails(num: num, down: down);
                 },
                 fullscreenDialog: true,
              ),
@@ -79,5 +79,5 @@ Widget downEntry(context, Down down, int num) {
         ),
         ),
       ),
-  );
+    );
 }

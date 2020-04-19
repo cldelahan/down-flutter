@@ -9,13 +9,13 @@ const color1 = const Color(0xff26c586);
 final db = FirebaseDatabase.instance.reference().child('down');
 Down d1 = Down(title: "Run", creator: "Conner", nInvited: 10, nDown: 5, isDown: false,
     time: DateTime(2020, 4, 6, 01, 03),
-    timeCreated: DateTime(2020, 4, 6, 05, 40));
+    timeCreated: DateTime(2020, 4, 6, 05, 40), nSeen: 6, address: "1025 N Charles St. Baltimore MD");
  Down d2 = Down(title: "Eat", creator: "Vance", nInvited: 6, nDown: 2, isDown: false,
     time: DateTime(2020, 4, 7, 10, 30),
-    timeCreated: DateTime(2020, 4, 6, 22, 10));
+    timeCreated: DateTime(2020, 4, 6, 22, 10), nSeen: 5);
 Down d3 = Down(title: "Study Brodes", creator: "Susan", nInvited: 3, nDown: 1, isDown: false,
     time: DateTime(2020, 4, 7, 16, 30),
-    timeCreated: DateTime(2020, 4, 6, 10, 20));
+    timeCreated: DateTime(2020, 4, 6, 10, 20), nSeen: 2);
 
 List<Down> downEntries = [d1, d2, d3];
 
