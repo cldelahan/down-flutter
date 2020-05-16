@@ -5,12 +5,12 @@ import '../DownCreation/MakeDownHome.dart' as Fourth;
 import '../DownCreation/MakeDownActivity.dart' as Fifth;
 import '../DownCreation/MakeDownTime.dart' as MyHomePage;
 
-class Second extends StatefulWidget {
+class CreateDown extends StatefulWidget {
   @override
   _PageViewDemoState createState() => _PageViewDemoState();
 }
 
-class _PageViewDemoState extends State<Second> {
+class _PageViewDemoState extends State<CreateDown> {
   PageController _controller = PageController(
     initialPage: 0,
   );

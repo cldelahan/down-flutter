@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:down/Pages/CreateAccountPage.dart';
 import '../Models/User.dart';
-import 'package:down/Pages/FeedPage.dart' as first;
-import 'package:down/Pages/DownPage1.dart' as second;
+import 'package:down/Pages/FeedPage.dart' as FeedPage;
+import 'package:down/Pages/CreateDown.dart' as CreateDown;
 import 'package:down/Pages/BurgerPage.dart' as third;
 import './UploadPage.dart';
 import './SearchPage.dart';
@@ -15,7 +16,7 @@ import '../Widgets/MyApp.dart';
 const color1 = const Color(0xff26c586);
 const transColor = Color(0x00000000);
 final GoogleSignIn gSignIn = GoogleSignIn();
-final usersReference = Firestore.instance.collection("users");
+final usersReference = FirebaseDatabase.instance.reference().child("Users");
 User currentUser;
 
 final DateTime timestamp = DateTime.now();
@@ -26,81 +27,30 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  // keeping track if user is signed in
+  // signin variables
   bool isSignedIn = true;
+  String phoneNumber;
+  String password;
+
+  // homepage variables
   PageController pageController;
   int getPageIndex = 0;
 
-  void initState() {
-    super.initState();
-
-    // if the user changes, try signing in with the account
-    gSignIn.onCurrentUserChanged.listen((gSignInAccount) {
-      controlSignIn(gSignIn);
-    }, onError: (gError) {
-      print("Error Message:" + gError.toString());
-    });
-
-    // if the user is already signed in, then let them sign in
-    gSignIn.signInSilently(suppressErrors: false).then((gSignInAccount) {
-      controlSignIn(gSignIn);
-    }).catchError((gError) {
-      print("Error Message: " + gError.toString());
-    });
-  }
-
-  controlSignIn(GoogleSignIn signInAccount) async {
-    if(signInAccount != null) {
-      // create user account in firebase
-      await saveUserInfoToFireStore();
-      setState(() {
-        isSignedIn = true;
-      });
-    } else {
-      setState((){
-        isSignedIn  = false;
-      });
-    }
-  }
-
-  saveUserInfoToFireStore() async {
-    final GoogleSignInAccount gCurrentUser = gSignIn.currentUser;
-    // get the snapshot of data from firebase user
-    DocumentSnapshot documentSnapshot = await usersReference.document(gCurrentUser.id).get();
-    // if they do not have an account
-    if (!documentSnapshot.exists) {
-      final username = await Navigator.push(context, MaterialPageRoute(builder: (context) => CreateAccountPage()));
-      usersReference.document(gCurrentUser.id).setData({
-        "id": gCurrentUser.id,
-        "profileName": gCurrentUser.displayName,
-        "userName": username,
-        "url": gCurrentUser.photoUrl,
-        "email": gCurrentUser.email,
-        "bio": "",
-        "timestamp": timestamp
-      });
-
-      documentSnapshot = await usersReference.document(gCurrentUser.id).get();
-    }
-
-    currentUser = User.fromDocument(documentSnapshot);
-  }
 
   void dispose() {
     pageController.dispose();
     super.dispose();
   }
 
-  loginUser() {
-    // signin user
-    gSignIn.signIn();
-    // if they are signed in - we need to check firebase
-    // and switch pages
+  void loginUser() {
   }
 
-  logoutUser() {
-    gSignIn.signOut();
+  Widget showPhonenumberInput() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(0.0, 100.0, 0.0, 0.0),
+    );
   }
+
 
   Widget buildHomeScreen() {
     //return RaisedButton.icon(onPressed: null, icon: Icon(Icons.close), label: Text("Sign Out"));
@@ -166,7 +116,7 @@ class MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    controller = new TabController(vsync: this, length: 5);
+    controller = new TabController(vsync: this, length: 4);
   }
 
   @override
@@ -203,11 +153,11 @@ class MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
                     color: color1),
                     child: new Icon(Icons.image),
                     ),),
-                  new Tab(child: new IconTheme(
+                  /*new Tab(child: new IconTheme(
                     data: new IconThemeData(
                         color: color1),
                     child: new Icon(Icons.search),
-                  ),)
+                  ),)*/
 
                   //child: new IconTheme(
                   //    data: new IconThemeData(
@@ -221,11 +171,11 @@ class MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
         body: new TabBarView(
             controller: controller,
             children: <Widget>[
-              new first.First(),
-              new second.Second(),
+              new FeedPage.FeedPage(),
+              new CreateDown.CreateDown(),
               new third.Third(),
               new MyApp(),
-              new SearchPage()
+              //new SearchPage()
             ]
         )
     );

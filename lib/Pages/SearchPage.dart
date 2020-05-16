@@ -1,10 +1,11 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:down/Widgets/ProgressWidget.dart';
 import 'package:down/Pages/HomePage.dart';
 import 'package:down/Models/User.dart';
-
+// TODO: No longer working after switch from FireStore to Firebase
+/*
 class SearchPage extends StatefulWidget {
   @override
   _SearchPageState createState() => _SearchPageState();
@@ -135,3 +136,4 @@ class UserResult extends StatelessWidget {
     );
   }
 }
+*/

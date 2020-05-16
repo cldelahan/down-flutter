@@ -62,7 +62,7 @@ Widget downEntry(context, Down down, int num) {
                   )
                 ),
                 Flexible(fit: FlexFit.tight, child: SizedBox()),
-                Text( DateTime.now().difference(down.timeCreated).inHours.toString() + " ago",
+                Text( DateTime.now().difference(down.timeCreated).inHours.toString() + "h ago",
                 style: TextStyle(
                   fontSize: 10.0,
                   color: Colors.grey
