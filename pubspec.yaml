@@ -62,3 +62,4 @@ flutter:
         - asset: assets/fonts/Lato.ttf
   assets:
     - assets/images/google_signin_button.png
+    - assets/images/DownLogo.png

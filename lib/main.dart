@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:down/Pages/HomePage.dart';
+import "Pages/LoginScreen.dart";
 
 //void main() => runApp(MyApp());
 
@@ -26,7 +26,9 @@ class MyApp extends StatelessWidget {
         primaryColor: Color(0xff26c586),
         accentColor: Color(0xff17a68b)
       ),
-      home: HomePage(),
+      // app initially starts off at Login Screen
+      // if there is no need to Login, will go directly to home page
+      home: LoginScreen(),
     );
   }
 }
