@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class UploadPage extends StatefulWidget {
   @override
@@ -10,6 +11,7 @@ class UploadPage extends StatefulWidget {
 
 class _UploadPageState extends State<UploadPage> {
   File file;
+  String fileName;
 
   captureImageWithCamera() async {
     Navigator.pop(context);

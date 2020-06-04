@@ -1,46 +1,75 @@
+/*
+  Author: Conner Delahanty
+  Notes:
+    Firebase phone authentication code adapted from Maaz Aftab's article,
+    https://medium.com/flutterpub/firebase-user-authentication-using-phone-verification-in-flutter-c34dc0f7a9f8
+
+  Code creates a login screen (with phone number input) and asks user for input
+
+ */
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:down/Pages/HomePage.dart';
+import 'package:down/Pages/UserInfoPage.dart';
 import 'package:flutter/material.dart';
 
 class LoginScreen extends StatelessWidget {
   final _phoneController = TextEditingController();
   final _codeController = TextEditingController();
+  final bool bypass = false;
 
   GlobalKey _scaffoldKey;
 
+  /*
+    This function logs in the user using their phone number and Firebase
+    authentication.
+   */
   Future<bool> loginUser(String phone, BuildContext context) async {
-    print("OUTPUT" + phone);
     FirebaseAuth _auth = FirebaseAuth.instance;
 
+    // Filling in FirebaseAuthentication function
     _auth.verifyPhoneNumber(
         phoneNumber: phone,
         timeout: Duration(seconds: 60),
+        // if the automatic authentication works properly, this function is
+        // called
         verificationCompleted: (AuthCredential credential) async {
-
           AuthResult result = await _auth.signInWithCredential(credential);
 
           Navigator.of(context).pop();
           FirebaseUser user = result.user;
 
           if (user != null) {
-            print("User is successful (automatically)");
-            print("Output user: " + user.uid);
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => HomePage(
-                          user: user,
-                        )));
+            // if the user is a new user, go to the UserInfoPage (to get
+            // additional information)
+            if (result.additionalUserInfo.isNewUser) {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => UserInfoPage(
+                        user: user,
+                      )));
+            } else {
+              // else jump directly to the homepage (tab view)
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          HomePage(
+                            user: user,
+                          )));
+            }
           } else {
             print("Error");
           }
-
-          //This callback would gets called when verification is done automatically
         },
+        // callback if verification fails
+        // TODO: put out clean "sorry incorrect code message"
         verificationFailed: (AuthException exception) {
           print(exception);
         },
+        // function if we send out the manual verification code
         codeSent: (String verificationId, [int forceResendingToken]) {
           showDialog(
               context: context,
@@ -49,7 +78,7 @@ class LoginScreen extends StatelessWidget {
                 return Scaffold(
                     key: _scaffoldKey,
                     body: AlertDialog(
-                      title: Text("Give the code?"),
+                      title: Text("Enter One-Time-Code"),
                       content: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: <Widget>[
@@ -76,14 +105,25 @@ class LoginScreen extends StatelessWidget {
                             FirebaseUser user = result.user;
 
                             if (user != null) {
-                              print("Output user: " + user.uid);
-                              print("User is successful (manually)");
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => HomePage(
-                                            user: user,
-                                          )));
+                              // if the user is a new user, go to the UserInfoPage (to get
+                              // additional information)
+                              if (result.additionalUserInfo.isNewUser) {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => UserInfoPage(
+                                          user: user,
+                                        )));
+                              } else {
+                                // else jump directly to the homepage (tab view)
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            HomePage(
+                                              user: user,
+                                            )));
+                              }
                             } else {
                               print("Error");
                             }
@@ -134,6 +174,9 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (bypass) {
+      return UserInfoPage();
+    }
     return Scaffold(
         body: SingleChildScrollView(
       child: Container(

@@ -15,7 +15,7 @@ final dbDown = FirebaseDatabase.instance.reference().child('down');
 final dbUsers= FirebaseDatabase.instance.reference().child('users');
 
 
-/*Down d1 = Down(title: "Run", creator: "Conner", nInvited: 10, nDown: 5, isDown: false,
+Down d1 = Down(title: "Run", creator: "Conner", nInvited: 10, nDown: 5, isDown: false,
     time: DateTime(2020, 4, 6, 01, 03),
     timeCreated: DateTime(2020, 4, 6, 05, 40), nSeen: 6, address: "1025 N Charles St. Baltimore MD");
  Down d2 = Down(title: "Eat", creator: "Vance", nInvited: 6, nDown: 2, isDown: false,
@@ -23,9 +23,9 @@ final dbUsers= FirebaseDatabase.instance.reference().child('users');
     timeCreated: DateTime(2020, 4, 6, 22, 10), nSeen: 5);
 Down d3 = Down(title: "Study Brodes", creator: "Susan", nInvited: 3, nDown: 1, isDown: false,
     time: DateTime(2020, 4, 7, 16, 30),
-    timeCreated: DateTime(2020, 4, 6, 10, 20), nSeen: 2);*/
+    timeCreated: DateTime(2020, 4, 6, 10, 20), nSeen: 2);
 
-List<Down> downEntries;
+List<Down> downEntries = [d1, d2, d3];
 
 class FeedPage extends StatefulWidget {
   final FirebaseUser user;
@@ -40,7 +40,7 @@ class _FeedPageState extends State<FeedPage> {
   /// Sample method for retrieving downs from Firebase
   /// Page needs to be refreshed for the data to load as reading from database is asynchronous.
   getDowns() async {
-    downEntries.clear();
+    //downEntries.clear();
     DataSnapshot userData = await dbUsers.once();
     dbGeneral.child("down").onChildAdded.listen((event) {
       DataSnapshot data = event.snapshot;
