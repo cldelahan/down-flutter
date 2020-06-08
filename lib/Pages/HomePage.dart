@@ -3,14 +3,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import '../Models/User.dart';
-import 'package:down/Pages/FeedPage.dart' as FeedPage;
-import 'package:down/Pages/CreateDown.dart' as CreateDown;
-import 'package:down/Pages/BurgerPage.dart' as third;
+import 'package:down/Pages/FeedPage.dart';
+import 'package:down/Pages/CreateDown.dart';
+import 'package:down/Pages/FriendGroupPage.dart';
 import '../Widgets/MyApp.dart';
 
 
-const color1 = const Color(0xff26c586);
-const transColor = Color(0x00000000);
 final usersReference = FirebaseDatabase.instance.reference().child("Users");
 User currentUser;
 
@@ -22,82 +20,47 @@ class HomePage extends StatefulWidget {
   HomePage({this.user});
 
   @override
-  _HomePageState createState() => _HomePageState();
+  _HomePageState createState() => _HomePageState(this.user);
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin{
 
   // homepage variables
+  FirebaseUser user;
   PageController pageController;
+  TabController tabController;
   int getPageIndex = 0;
 
+  _HomePageState(this.user);
 
-  void dispose() {
-    pageController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    //return RaisedButton.icon(onPressed: null, icon: Icon(Icons.close), label: Text("Sign Out"));
-    return new MyTabs();
-  }
-
-}
-
-
-class MyTabs extends StatefulWidget {
-
-  FirebaseUser user;
-  MyTabs({this.user});
-  @override
-  MyTabsState createState() => new MyTabsState();
-}
-
-class MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
-
-  TabController controller;
 
   @override
   void initState() {
     super.initState();
-    controller = new TabController(vsync: this, length: 4);
+    tabController = new TabController(vsync: this, length: 4);
   }
 
   @override
   void dispose() {
-    controller.dispose();
+    pageController.dispose();
+    tabController.dispose();
     super.dispose();
   }
 
+
   @override
   Widget build(BuildContext context) {
+    //return RaisedButton.icon(onPressed: null, icon: Icon(Icons.close), label: Text("Sign Out"));
     return new Scaffold(
         bottomNavigationBar: new Material(
-            color: transColor,
+            color: Colors.transparent,
             child: new TabBar(
-                controller: controller,
+                controller: tabController,
                 tabs: <Tab>[
-                  new Tab(child: new IconTheme(
-                    data: new IconThemeData(
-                        color: color1),
-                    child: new Icon(Icons.home),
-                  ),),
-                  new Tab(child: new IconTheme(
-                    data: new IconThemeData(
-                        color: color1),
-                    child: new Icon(Icons.arrow_downward),
-                  ),),
-                  new Tab(child: new IconTheme(
-                    data: new IconThemeData(
-                        color: color1),
-                    child: new Icon(Icons.group),
-                  ),),
-                  new Tab(child: new IconTheme(
-                    data: new IconThemeData(
-                    color: color1),
-                    child: new Icon(Icons.image),
-                    ),),
+                  new Tab(child: new Icon(Icons.home)),
+                  new Tab(child: new Icon(Icons.arrow_downward)),
+                  new Tab(child: new Icon(Icons.group)),
+                  new Tab(child: new Icon(Icons.image))
                   /*new Tab(child: new IconTheme(
                     data: new IconThemeData(
                         color: color1),
@@ -114,15 +77,16 @@ class MyTabsState extends State<MyTabs> with SingleTickerProviderStateMixin {
             )
         ),
         body: new TabBarView(
-            controller: controller,
+            controller: tabController,
             children: <Widget>[
-              new FeedPage.FeedPage(),
-              new CreateDown.CreateDown(),
-              new third.Third(),
+              new FeedPage(this.user),
+              new CreateDown(),
+              new FriendGroupPage(this.user),
               new MyApp(),
               //new SearchPage()
             ]
         )
     );
   }
+
 }

@@ -26,13 +26,31 @@ class User {
   /// Is it inefficient to recreate an array of downs anytime a down changes?
   /// Likely yes - but was the underlying component of Down 1.0
   ///
-  static User populateUser(DataSnapshot ds) {
+  static User populateFromDataSnapshot(DataSnapshot ds) {
     Map entry = ds.value;
+    User temp;
+    try {
+      temp = new User(
+          id: ds.key,
+          profileName: entry['profileName'],
+          url: entry['url'],
+          email: entry['email']
+      );
+      return temp;
+    } on Exception catch(_){
+      return null;
+    }
+  }
+
+  static User populateFromMap(Map m, String uid) {
+    if (m == null || uid == null) {
+      return null;
+    }
     return User(
-        id: ds.key,
-        profileName: entry['profileName'],
-        url: entry['url'],
-        email: entry['email']
+      id: uid,
+      profileName: m['profileName'],
+      url: m['url'],
+      email: m['email']
     );
   }
 }

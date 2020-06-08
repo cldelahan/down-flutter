@@ -1,10 +1,12 @@
 /*
   Author: Conner Delahanty
+
+  Code creates a login screen (with phone number input) and asks user for input
+
   Notes:
     Firebase phone authentication code adapted from Maaz Aftab's article,
     https://medium.com/flutterpub/firebase-user-authentication-using-phone-verification-in-flutter-c34dc0f7a9f8
 
-  Code creates a login screen (with phone number input) and asks user for input
 
  */
 

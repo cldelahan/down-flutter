@@ -5,14 +5,13 @@ import '../Models/User.dart';
 import '../Widgets/UserEntry.dart';
 
 class DownEntryDetails extends StatelessWidget {
-  final int num;
   final Down down;
   static User test1 = User(id: "c1", profileName: "Conner D", email: "conner@gmail.com", url: "http://connerdelahanty.com/ConnerDelahanty.jpg");
   static User test2 = User(id: "v1", profileName: "Vance W", email: "vance@gmail.comm", url: "https://hopkinssports.com/images/2019/10/22/Wood_Img1820.jpg?width=300");
   List<User> userEntries = [test1, test2];
 
 
-  DownEntryDetails({Key key, this.num, this.down}) : super(key: key);
+  DownEntryDetails({Key key, this.down}) : super(key: key);
 
 
   @override
@@ -21,9 +20,7 @@ class DownEntryDetails extends StatelessWidget {
         isAppTitle: false, strTitle: down.title);
     final MediaQueryData mediaQuery = MediaQuery.of(context);
 
-    return Hero(
-        tag: num,
-        child: Scaffold(
+    return  Scaffold(
             appBar: appBar,
             body: Center (
               child: Padding(
@@ -78,6 +75,6 @@ class DownEntryDetails extends StatelessWidget {
                     height: mediaQuery.padding.top,
                   ),
                 ])))
-        ));
+        );
   }
 }

@@ -186,7 +186,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
                       context,
                       MaterialPageRoute(
                           builder: (context) => FeedPage(
-                                user: user,
+                                user,
                               )));
                 }
               },
@@ -229,7 +229,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
   void _uploadPhoto() {
     final FirebaseStorage _storage =
         FirebaseStorage(storageBucket: 'gs://down-flutter.appspot.com');
-    String filePath = 'profileImages/${DateTime.now()}';
+    String filePath = 'profileImages/${DateTime.now().millisecondsSinceEpoch.toString()}';
     this._imageURL = 'gs://down-flutter.appspot.com/' + filePath;
     _storage.ref().child(filePath).put(this._imageFile);
   }
