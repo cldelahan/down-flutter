@@ -12,6 +12,7 @@
  */
 
 import 'package:firebase_database/firebase_database.dart';
+import 'package:down/Models/RecommendedActivity.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:down/Models/Status.dart';
 import 'package:down/Models/User.dart';
@@ -19,17 +20,16 @@ import 'package:down/Models/User.dart';
 // template class to model a user
 // allows for better importing into Firebase
 class Down {
-
   // firebase vars
   final dbDowns = FirebaseDatabase.instance.reference().child('downs');
 
   // raw values from database
   final String id;
-  final String title;
+  String title;
   final String creatorID;
-  final List<String> invitedIDs;
-  final DateTime time;
-  final DateTime timeCreated;
+  List<String> invitedIDs = [];
+  DateTime time;
+  DateTime timeCreated;
   final String address;
   final String advertId;
 
@@ -39,10 +39,13 @@ class Down {
   int nInvited;
   bool isDown;
   String creatorUrl;
+
   //List<DownStatus> downStatuses;
   //List<String> invitedNames;
   // for getting additional data from database
 
+  bool isBuildOffRecommendedActivity = false;
+  RecommendedActivity recommendedActivity;
 
   Down({
     this.id,
@@ -54,16 +57,20 @@ class Down {
     this.timeCreated,
     this.address,
     this.advertId,
-  }){
-    this.nInvited = this.invitedIDs.length;
+  }) {
+    if (this.invitedIDs == null) {
+      this.nInvited = 0;
+    } else {
+      this.nInvited = this.invitedIDs.length;
+    }
   }
-
 
   String getCleanTime() {
     String minute = this.time.minute.toString();
     String hour = (this.time.hour % 12 + 1).toString();
     // Would need changed if we abandoned the 24-hour approach
-    String todayOrTom = this.time.day == DateTime.now().day ? "Today" : "Tomorrow";
+    String todayOrTom =
+        this.time.day == DateTime.now().day ? "Today" : "Tomorrow";
     String amPm = this.time.hour > 11 ? "pm" : "am";
 
     if (minute.length == 1) {
@@ -73,14 +80,18 @@ class Down {
       hour = "0" + hour;
     }
 
-    return todayOrTom + "  " + hour+ ":" + minute + " " + amPm;
+    return todayOrTom + "  " + hour + ":" + minute + " " + amPm;
   }
 
   String getGoingSummary() {
     int nNotSeen = nInvited - 0; // normally  = nInvited - nSeen
     //TODO: Do we want to implement a seen Method? For now hardcoded at 0
-    return nDown.toString() + " Down ~ " + nNotSeen.toString() + " Haven't Seen ~ " +
-      nInvited.toString() + " Invited";
+    return nDown.toString() +
+        " Down ~ " +
+        nNotSeen.toString() +
+        " Haven't Seen ~ " +
+        nInvited.toString() +
+        " Invited";
   }
 
   ///
@@ -94,7 +105,7 @@ class Down {
     Down temp;
     print("Printing entry toString(): " + entry.toString());
     try {
-      Map invitedToIsDown = Map<String,int>.from(entry['invited']);
+      Map invitedToIsDown = Map<String, int>.from(entry['invited']);
       List<String> invitedIDsTemp = invitedToIsDown.keys.toList();
       List<int> invitedDownStatuses = invitedToIsDown.values.toList();
       int nDownTemp = 0;
@@ -104,20 +115,19 @@ class Down {
         }
       }
       temp = Down(
-          id: ds.key,
-          creatorID: entry['creator'],
-          nDown: nDownTemp,
-          invitedIDs: invitedIDsTemp,
-          time: DateTime.parse(entry['time']),
-          timeCreated: DateTime.parse(entry['timeCreated']),
-          title: entry['title'],
-          address: entry['address'],
-          //advertId: entry['advertID'],
+        id: ds.key,
+        creatorID: entry['creator'],
+        nDown: nDownTemp,
+        invitedIDs: invitedIDsTemp,
+        time: DateTime.parse(entry['time']),
+        timeCreated: DateTime.parse(entry['timeCreated']),
+        title: entry['title'],
+        address: entry['address'],
+//advertId: entry['advertID'],
       );
       return temp;
-    } on Exception catch(_) {
+    } on Exception catch (_) {
       return null;
     }
   }
-
 }

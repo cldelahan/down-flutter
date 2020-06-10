@@ -5,6 +5,13 @@
   displays them here.
 
   Notes:
+  This currently requires passing the FirebaseUser user object to the class. We instead
+  can use the FirebaseAuth.instance.getCurrentUser() function. However that is async.
+  It can only be used in the listener then, but that would require setting our dbUserDowns
+  DB reference to the user root - making it trigger on a lot of data that isn't new downs
+  (such as other users new downs and creating new users)
+
+  Because of this, I pass the FirebaseUser user object, although it is a bit sloppy
 
  */
 
@@ -43,7 +50,7 @@ class _FeedPageState extends State<FeedPage> with AutomaticKeepAliveClientMixin{
   DatabaseReference dbAllDowns;
   DatabaseReference dbAllUsers;
   DatabaseReference dbUserDowns;
-  bool wantKeepAlive = false;
+  bool wantKeepAlive = true;
 
   _FeedPageState(this.user);
 

@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import '../Models/User.dart';
 import 'package:down/Pages/FeedPage.dart';
-import 'package:down/Pages/CreateDown.dart';
+import 'package:down/DownCreation/CreateDownActivityScreen.dart';
 import 'package:down/Pages/FriendGroupPage.dart';
 import '../Widgets/MyApp.dart';
 
@@ -23,7 +23,7 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState(this.user);
 }
 
-class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin{
+class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin{
 
   // homepage variables
   FirebaseUser user;
@@ -31,13 +31,17 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   TabController tabController;
   int getPageIndex = 0;
 
+  @override
+  bool get wantKeepAlive => true;
+
   _HomePageState(this.user);
 
 
   @override
   void initState() {
     super.initState();
-    tabController = new TabController(vsync: this, length: 4);
+    setState((){});
+    tabController = new TabController(vsync: this, length: 3);
   }
 
   @override
@@ -60,7 +64,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                   new Tab(child: new Icon(Icons.home)),
                   new Tab(child: new Icon(Icons.arrow_downward)),
                   new Tab(child: new Icon(Icons.group)),
-                  new Tab(child: new Icon(Icons.image))
                   /*new Tab(child: new IconTheme(
                     data: new IconThemeData(
                         color: color1),
@@ -80,9 +83,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             controller: tabController,
             children: <Widget>[
               new FeedPage(this.user),
-              new CreateDown(),
+              new CreateDownActivityScreen(this.user),
               new FriendGroupPage(this.user),
-              new MyApp(),
               //new SearchPage()
             ]
         )

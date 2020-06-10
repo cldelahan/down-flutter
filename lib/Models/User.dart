@@ -9,6 +9,7 @@ class User {
   final String url;
   final String email;
   final String token;
+  bool invite = false;
 
   User({
     this.id,
@@ -52,5 +53,9 @@ class User {
       url: m['url'],
       email: m['email']
     );
+  }
+
+  String toString() {
+    return this.profileName;
   }
 }
