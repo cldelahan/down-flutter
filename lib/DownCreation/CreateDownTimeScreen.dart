@@ -67,7 +67,23 @@ class _CreateDownTimeScreenState extends State<CreateDownTimeScreen> {
             context: context,
             initialTime: TimeOfDay.fromDateTime(currentValue ?? DateTime.now()),
           );
-          this._builtDown.time = DateTimeField.convert(time);
+          // this is the set time from the widget (though date is 01/01/01)
+          DateTime temp = DateTimeField.convert(time);
+          // now we create a new time with some fields being today / tomorrow
+          // with their time
+          DateTime downTime;
+          if (temp.hour > DateTime.now().hour) {
+            // is today
+            downTime = new DateTime(DateTime.now().year, DateTime.now().month,
+            DateTime.now().day, temp.hour, temp.minute, 0);
+          } else {
+            // is tomorrow
+            downTime = new DateTime(DateTime.now().year, DateTime.now().month,
+                DateTime.now().day, temp.hour, temp.minute, 0);
+            downTime = downTime.add(new Duration(days: 1));
+          }
+
+          this._builtDown.time = downTime;
           this._builtDown.timeCreated = DateTime.now();
           Navigator.of(context).push(_createRoute());
           return;

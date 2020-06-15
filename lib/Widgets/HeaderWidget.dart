@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import './MyApp.dart';
 import '../Models/User.dart';
 import '../Pages/SettingsPage.dart';
 
-AppBar header(context, {bool isAppTitle, String strTitle, bool incProfile=false, disappearedBackButton=false}) {
-  // would not have a user here - would source data from some persistent state
-  // put temporarily for testing
-  User test = User(id: "acasf", profileName: "Conner Delahanty", email: "cldelahan@gmail.com", url: "http://connerdelahanty.com/ConnerDelahanty.jpg");
+AppBar header(context, {FirebaseUser user, bool isAppTitle, String strTitle, bool incProfile=false, disappearedBackButton=false}) {
+
 
     return AppBar(
         iconTheme: IconThemeData(
@@ -32,7 +31,7 @@ AppBar header(context, {bool isAppTitle, String strTitle, bool incProfile=false,
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => settingsPage(context, test, true)),
+              MaterialPageRoute(builder: (context) => SettingsPage(user)),
             );
           },
           child: Text("Profile"),

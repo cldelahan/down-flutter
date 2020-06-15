@@ -17,7 +17,7 @@ final DateTime timestamp = DateTime.now();
 class HomePage extends StatefulWidget {
 
   final FirebaseUser user;
-  HomePage({this.user});
+  HomePage(this.user);
 
   @override
   _HomePageState createState() => _HomePageState(this.user);
@@ -46,7 +46,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
   @override
   void dispose() {
-    pageController.dispose();
     tabController.dispose();
     super.dispose();
   }

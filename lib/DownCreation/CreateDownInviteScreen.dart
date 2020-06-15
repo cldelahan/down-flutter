@@ -113,7 +113,7 @@ class _CreateDownInviteScreenState extends State<CreateDownInviteScreen>
                     _uploadToFirebase();
                     Navigator.pushAndRemoveUntil(
                       context, MaterialPageRoute(
-                        builder: (context) => HomePage(user: this.user)),
+                        builder: (context) => HomePage(this.user)),
                           (Route<dynamic> route) => false,
                     );
                   }
@@ -186,9 +186,9 @@ class _CreateDownInviteScreenState extends State<CreateDownInviteScreen>
       // with the key their UID, then 0 denoting not down, and
       // 1 denoting down
       if (allInvitedUids[i] == this.user.uid) {
-        newChild.child("invited").child(allInvitedUids[i]).set(1);
+        newChild.child("invited").child(allInvitedUids[i]).set(true);
       } else {
-        newChild.child("invited").child(allInvitedUids[i]).set(0);
+        newChild.child("invited").child(allInvitedUids[i]).set(false);
       }
     }
   }

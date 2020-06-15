@@ -73,6 +73,8 @@ class _FriendGroupPageState extends State<FriendGroupPage>
     dbRequests.onChildAdded.listen(_onRequestAdded);
   }
 
+
+
   _onFriendAdded(Event event) async {
     DataSnapshot friendInfo = await dbAllUsers.child(event.snapshot.key).once();
     setState(() {

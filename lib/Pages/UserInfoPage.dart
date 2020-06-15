@@ -17,6 +17,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:down/Pages/FeedPage.dart';
+import 'package:down/Pages/HomePage.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class UserInfoPage extends StatefulWidget {
@@ -185,7 +186,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => FeedPage(
+                          builder: (context) => HomePage(
                                 user,
                               )));
                 }

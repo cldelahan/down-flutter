@@ -23,6 +23,8 @@ class LoginScreen extends StatelessWidget {
 
   GlobalKey _scaffoldKey;
 
+  FirebaseAuth auth = FirebaseAuth.instance;
+
   /*
     This function logs in the user using their phone number and Firebase
     authentication.
@@ -59,7 +61,7 @@ class LoginScreen extends StatelessWidget {
                   MaterialPageRoute(
                       builder: (context) =>
                           HomePage(
-                            user: user,
+                            user,
                           )));
             }
           } else {
@@ -123,7 +125,7 @@ class LoginScreen extends StatelessWidget {
                                     MaterialPageRoute(
                                         builder: (context) =>
                                             HomePage(
-                                              user: user,
+                                              user,
                                             )));
                               }
                             } else {
@@ -173,12 +175,32 @@ class LoginScreen extends StatelessWidget {
     );
   }
 
+  void _autoSignin(BuildContext context) async {
+    FirebaseUser curUser = await auth.currentUser();
+    print("Autosignin User attempt: " + curUser.toString());
+    if (curUser == null) {
+      print("Cur user is void");
+      return;
+    } else {
+      print("Cur user autosigned-in");
+      // user is not null so we can go to homepage
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => HomePage(
+                curUser,
+              )));
+    }
+
+  }
+
 
   @override
   Widget build(BuildContext context) {
     if (bypass) {
       return UserInfoPage();
     }
+    _autoSignin(context);
     return Scaffold(
         body: SingleChildScrollView(
       child: Container(

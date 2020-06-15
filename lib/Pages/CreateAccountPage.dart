@@ -28,7 +28,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
   Widget build(BuildContext parentContext) {
     return Scaffold(
       key: _scaffoldKey,
-      appBar: header(context, strTitle: "Settings", disappearedBackButton: true),
+      appBar: header(context, strTitle: "Settings", disappearedBackButton: false),
       body: ListView (
         children: <Widget>[
           Container(

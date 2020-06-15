@@ -31,11 +31,13 @@ class _ManageGroupPageState extends State<ManageGroupPage> {
   DatabaseReference dbFriends;
   DatabaseReference dbAllUsers;
 
-  TextEditingController _nameController;
+  final _groupKey = new GlobalKey<FormState>();
 
   List<User> _friends = [];
 
   List<User> _chosenFriends = [];
+
+  String _groupName;
 
   _ManageGroupPageState(this.user);
 
@@ -49,7 +51,7 @@ class _ManageGroupPageState extends State<ManageGroupPage> {
         .child("users/${user.uid}/friends");
 
     dbGroups =
-        FirebaseDatabase.instance.reference().child("user/${user.uid}/groups");
+        FirebaseDatabase.instance.reference().child("users/${user.uid}/groups");
 
     dbFriends.onChildAdded.listen(_onFriendAdded);
   }
@@ -62,11 +64,22 @@ class _ManageGroupPageState extends State<ManageGroupPage> {
     });
   }
 
+  _createGroup() {
+    // add chosenFriends to personal group
+    for (User i in this._chosenFriends) {
+      dbGroups.child(this._groupName).update({
+        i.id: 0,
+      });
+    }
+  }
+
   Widget chooseNameField() {
     return new Padding(
         padding: EdgeInsets.fromLTRB(16.0, 50.0, 16.0, 0.0),
         child: TextFormField(
-          controller: this._nameController,
+          onChanged: (value) {
+            this._groupName = value;
+          },
           validator: (value) {
             if (value.length == 0) {
               return "Invalid name";
@@ -75,7 +88,6 @@ class _ManageGroupPageState extends State<ManageGroupPage> {
           decoration: InputDecoration(
             hintText: "Enter Name",
           ),
-
         ));
   }
 
@@ -92,39 +104,114 @@ class _ManageGroupPageState extends State<ManageGroupPage> {
               return new Container(color: Colors.transparent);
             }
             return new GestureDetector(
-              onTap: () {
-                this._chosenFriends.add(_friends[index]);
-                this._friends.remove(_friends[index]);
-                setState((){});
-              },
+                onTap: () {
+                  this._chosenFriends.add(_friends[index]);
+                  this._friends.remove(_friends[index]);
+                  setState(() {});
+                },
                 child: ListTile(
-                leading: new Container(
-                    width: 40.0,
-                    height: 40.0,
-                    decoration: new BoxDecoration(
-                        shape: BoxShape.circle,
-                        image: new DecorationImage(
-                            fit: BoxFit.fill,
-                            image: this._friends[index].url.startsWith("gs")
-                                ? new FirebaseImage(this._friends[index].url)
-                                : new NetworkImage(this._friends[index].url)))),
-                title: Text(this._friends[index].profileName)));
+                    leading: new Container(
+                        width: 40.0,
+                        height: 40.0,
+                        decoration: new BoxDecoration(
+                            shape: BoxShape.circle,
+                            image: new DecorationImage(
+                                fit: BoxFit.fill,
+                                image: this._friends[index].url.startsWith("gs")
+                                    ? new FirebaseImage(
+                                        this._friends[index].url)
+                                    : new NetworkImage(
+                                        this._friends[index].url)))),
+                    title: Text(this._friends[index].profileName)));
           },
         )));
+  }
+
+  Widget createGroupButton() {
+    return Padding(
+        padding: const EdgeInsets.fromLTRB(0.0, 50.0, 0.0, 0.0),
+        child: new Material(
+            color: Colors.transparent,
+            child: new Center(
+                child: new RaisedButton(
+              child: Text("Create Group"),
+              color: Theme.of(context).primaryColor,
+              onPressed: () {
+                // before submitting make sure the form is valid
+                if (!_groupKey.currentState.validate()) {
+                  return;
+                }
+                // if no image was specified set their image to default
+                // put photo in firebase
+                // fill out their database location
+                _createGroup();
+                // move to the homepage
+                Navigator.pop(context);
+              },
+            ))));
+  }
+
+  Widget buildChosenFriendsDisplay() {
+    return Padding(
+        padding: EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0.0),
+        child: Container(
+            height: 100,
+            width: 1000,
+            decoration: BoxDecoration(
+                border: Border.symmetric(
+                    vertical: BorderSide(
+              width: 2.0,
+              color: Colors.black,
+            ))),
+            child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                shrinkWrap: true,
+                itemCount: this._chosenFriends.length,
+                itemBuilder: (BuildContext context, int index) {
+                  if (_chosenFriends[index] == null) {
+                    return new Container(color: Colors.transparent);
+                  }
+                  return new GestureDetector(
+                      onTap: () {
+                        this._friends.add(_chosenFriends[index]);
+                        this._chosenFriends.removeAt(index);
+                        setState(() {});
+                      },
+                      child: new Column(children: <Widget>[
+                        new Container(
+                            height: 50,
+                            child: Image(
+                                image: this
+                                        ._chosenFriends[index]
+                                        .url
+                                        .startsWith("gs")
+                                    ? new FirebaseImage(
+                                        this._chosenFriends[index].url)
+                                    : new NetworkImage(
+                                        this._chosenFriends[index].url))),
+                        new Text(
+                          this._chosenFriends[index].profileName,
+                          softWrap: true,
+                          overflow: TextOverflow.ellipsis,
+                        )
+                      ]));
+                })));
   }
 
   Widget showChosenNames() {
     return Container();
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         body: SafeArea(
-            child: Column(children: <Widget>[
-              chooseNameField(),
+            child: new SingleChildScrollView(
+        child: Column(children: <Widget>[
+      new Form(key: _groupKey, child: chooseNameField()),
+      buildChosenFriendsDisplay(),
       buildFriendList(),
-    ])));
+      createGroupButton(),
+    ]))));
   }
 }

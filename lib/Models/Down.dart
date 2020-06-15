@@ -26,22 +26,25 @@ class Down {
   // raw values from database
   final String id;
   String title;
-  final String creatorID;
   List<String> invitedIDs = [];
+  List<bool> invitedUserIsDown = [];
   DateTime time;
   DateTime timeCreated;
   final String address;
   final String advertId;
 
   // derived values from database
-  String creator;
+  String creatorID;
   int nDown;
   int nInvited;
   bool isDown;
-  String creatorUrl;
+
+  User creator;
+
+  List<User> invitedUsers = [];
 
   //List<DownStatus> downStatuses;
-  //List<String> invitedNames;
+  //List<String> invitedNames;zd
   // for getting additional data from database
 
   bool isBuildOffRecommendedActivity = false;
@@ -57,6 +60,7 @@ class Down {
     this.timeCreated,
     this.address,
     this.advertId,
+    this.invitedUserIsDown,
   }) {
     if (this.invitedIDs == null) {
       this.nInvited = 0;
@@ -87,11 +91,15 @@ class Down {
     int nNotSeen = nInvited - 0; // normally  = nInvited - nSeen
     //TODO: Do we want to implement a seen Method? For now hardcoded at 0
     return nDown.toString() +
-        " Down ~ " +
-        nNotSeen.toString() +
-        " Haven't Seen ~ " +
+        " Down | " +
+        // nNotSeen.toString() +
+        // " Haven't Seen ~ " +
         nInvited.toString() +
         " Invited";
+  }
+
+  void setInvitedUsers(List<User> u) {
+    this.invitedUsers = u;
   }
 
   ///
@@ -105,12 +113,12 @@ class Down {
     Down temp;
     print("Printing entry toString(): " + entry.toString());
     try {
-      Map invitedToIsDown = Map<String, int>.from(entry['invited']);
+      Map invitedToIsDown = Map<String, bool>.from(entry['invited']);
       List<String> invitedIDsTemp = invitedToIsDown.keys.toList();
-      List<int> invitedDownStatuses = invitedToIsDown.values.toList();
+      List<bool> invitedDownStatuses = invitedToIsDown.values.toList();
       int nDownTemp = 0;
       for (int i = 0; i < invitedDownStatuses.length; i++) {
-        if (invitedDownStatuses[i] == 1) {
+        if (invitedDownStatuses[i]) {
           nDownTemp += 1;
         }
       }
@@ -122,6 +130,7 @@ class Down {
         time: DateTime.parse(entry['time']),
         timeCreated: DateTime.parse(entry['timeCreated']),
         title: entry['title'],
+        invitedUserIsDown: invitedDownStatuses,
         address: entry['address'],
 //advertId: entry['advertID'],
       );

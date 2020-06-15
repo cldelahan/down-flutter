@@ -7,16 +7,30 @@
   Notes:
 
  */
+import 'package:down/Models/User.dart';
 
-class DownStatus {
-  String posterID;
-  String posterName;
+class Status {
+  User poster;
   String status;
+  Set<String> likerUids = new Set();
   int nUpvoted = 0;
 
-  DownStatus({this.posterID, this.posterName, this.status, this.nUpvoted});
+  bool likedByUser = false;
 
-  int compareTo(DownStatus other) {
+
+  void countLikers(Map likeData) {
+    if (likeData == null) {
+      nUpvoted = 0;
+      return;
+    }
+    for (String liker in likeData.keys) {
+      likerUids.add(liker);
+      nUpvoted += 1;
+    }
+  }
+
+
+  int compareTo(Status other) {
     if (this.nUpvoted > other.nUpvoted) {
       return 1;
     } else {
