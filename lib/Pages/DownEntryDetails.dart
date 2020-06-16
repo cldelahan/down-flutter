@@ -100,7 +100,7 @@ class _DownEntryDetailsState extends State<DownEntryDetails>
     for (String userId in this.down.invitedIDs) {
       print("userID: " + userId);
       DataSnapshot tempDS = await dbAllUsers.child(userId).once();
-      temp = User.populateFromDataSnapshot(tempDS);
+      temp = User.populateFromDataSnapshot(tempDS, this.user);
       print(temp);
       invitedUsers.add(temp);
       // allows for rapid conversion between uid and User class
@@ -147,11 +147,7 @@ class _DownEntryDetailsState extends State<DownEntryDetails>
                   height: 40.0,
                   decoration: new BoxDecoration(
                       shape: BoxShape.circle,
-                      image: new DecorationImage(
-                          fit: BoxFit.fill,
-                          image: s.poster.url.startsWith("gs")
-                              ? new FirebaseImage(s.poster.url)
-                              : new NetworkImage(s.poster.url)))),
+                      image: s.poster.getImageOfUser())),
               SizedBox(width: 10.0),
               Text(s.poster.profileName,
                   style: TextStyle(
@@ -285,19 +281,10 @@ class _DownEntryDetailsState extends State<DownEntryDetails>
                               height: 40.0,
                               decoration: new BoxDecoration(
                                   shape: BoxShape.circle,
-                                  image: new DecorationImage(
-                                      fit: BoxFit.fill,
-                                      image: this
+                                  image:  this
                                               .down
                                               .invitedUsers[index]
-                                              .url
-                                              .startsWith("gs")
-                                          ? new FirebaseImage(
-                                              this.down.invitedUsers[index].url)
-                                          : new NetworkImage(this
-                                              .down
-                                              .invitedUsers[index]
-                                              .url)))),
+                                              .getImageOfUser())),
                           title:
                               Text(this.down.invitedUsers[index].profileName)));
                   /*

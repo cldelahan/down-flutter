@@ -58,7 +58,7 @@ class _ManageGroupPageState extends State<ManageGroupPage> {
 
   _onFriendAdded(Event event) async {
     DataSnapshot friendInfo = await dbAllUsers.child(event.snapshot.key).once();
-    User temp = User.populateFromDataSnapshot(friendInfo);
+    User temp = User.populateFromDataSnapshot(friendInfo, user);
     setState(() {
       _friends.add(temp);
     });
@@ -115,13 +115,7 @@ class _ManageGroupPageState extends State<ManageGroupPage> {
                         height: 40.0,
                         decoration: new BoxDecoration(
                             shape: BoxShape.circle,
-                            image: new DecorationImage(
-                                fit: BoxFit.fill,
-                                image: this._friends[index].url.startsWith("gs")
-                                    ? new FirebaseImage(
-                                        this._friends[index].url)
-                                    : new NetworkImage(
-                                        this._friends[index].url)))),
+                            image: this._friends[index].getImageOfUser())),
                     title: Text(this._friends[index].profileName)));
           },
         )));
@@ -179,16 +173,13 @@ class _ManageGroupPageState extends State<ManageGroupPage> {
                       },
                       child: new Column(children: <Widget>[
                         new Container(
-                            height: 50,
-                            child: Image(
-                                image: this
-                                        ._chosenFriends[index]
-                                        .url
-                                        .startsWith("gs")
-                                    ? new FirebaseImage(
-                                        this._chosenFriends[index].url)
-                                    : new NetworkImage(
-                                        this._chosenFriends[index].url))),
+                            height: 40.0,
+                            width: 40.0,
+                                decoration: new BoxDecoration(
+                                    shape: BoxShape.circle,
+                                        image:
+                                        _chosenFriends[index]
+                                        .getImageOfUser())),
                         new Text(
                           this._chosenFriends[index].profileName,
                           softWrap: true,

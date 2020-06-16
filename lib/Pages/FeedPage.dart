@@ -125,7 +125,7 @@ class _FeedPageState extends State<FeedPage>
     print("recieved down data: " + newRecievedDown.toString());
     DataSnapshot userInfo =
         await dbAllUsers.child(newRecievedDown.creatorID).once();
-    User creator = User.populateFromDataSnapshot(userInfo);
+    User creator = User.populateFromDataSnapshot(userInfo, user);
     newRecievedDown.creator = creator;
 
     // set if this user is down in our local object

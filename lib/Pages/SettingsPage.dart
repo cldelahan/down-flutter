@@ -1,9 +1,33 @@
+/*
+Author: Conner Delahanty
+
+Displays a setting page where the user can change underlying data about
+themselves.
+
+Notes:
+  We presently decided to put the permission and contact reading on this page.
+  We could force it on the user earlier, but that requires choosing the
+  permissions. If a user doesn't give us permission, they are unlikely to
+  adjust it later on, meaning they will not get access to the import-contacts
+  feature.
+
+  We can draw attention to this feature perhaps by starting pop-up, or other
+  means.
+
+
+*/
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_image/firebase_image.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:down/Models/User.dart';
+import 'package:down/Pages/ImportContactsPage.dart';
 import '../Pages/UploadPage.dart';
+
+// simple_permissions is giving issues
+//import 'package:simple_permissions/simple_permissions.dart';
+import 'package:contacts_service/contacts_service.dart';
 
 class SettingsPage extends StatefulWidget {
   FirebaseUser user;
@@ -36,7 +60,7 @@ class _SettingsPageState extends State<SettingsPage> {
     print("Pre settings page");
     print("Settings page: " + event.snapshot.value.toString());
     print("SETTINGS PAGE: " + event.snapshot.key.toString());
-    User temp = User.populateFromDataSnapshot(event.snapshot);
+    User temp = User.populateFromDataSnapshot(event.snapshot, user);
     this.currentUser = temp;
     print(this.currentUser.email);
 
@@ -61,14 +85,7 @@ class _SettingsPageState extends State<SettingsPage> {
                               height: 60.0,
                               decoration: new BoxDecoration(
                                   shape: BoxShape.circle,
-                                  image: new DecorationImage(
-                                      fit: BoxFit.fill,
-                                      image:
-                                          this.currentUser.url.startsWith("gs")
-                                              ? new FirebaseImage(
-                                                  this.currentUser.url)
-                                              : new NetworkImage(
-                                                  this.currentUser.url))))),
+                                  image: this.currentUser.getImageOfUser()))),
                       //SizedBox(width: 10.0),
                       Text(
                         currentUser.profileName,
@@ -83,9 +100,10 @@ class _SettingsPageState extends State<SettingsPage> {
                         style: TextStyle(fontSize: 20, color: Colors.black))
                   ])),
             ),
-            body: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
+            body: SingleChildScrollView(
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
                   Padding(
                       padding: EdgeInsets.all(10.0),
                       child: Text("Account Settings",
@@ -119,14 +137,68 @@ class _SettingsPageState extends State<SettingsPage> {
                               fontFamily: "Lato"),
                           textAlign: TextAlign.left)),
                   SizedBox(height: 5.0),
+                  importContactEntry(),
                   settingEntry("Tutorial", Icons.bookmark),
                   settingEntry("Privacy Policy", Icons.gavel)
-                ])));
+                ]))));
+  }
+
+  Widget importContactEntry() {
+    return GestureDetector(
+        onTap: () async {
+          // first need to check permission to read contacts
+          /*bool readContactPermissionAlreadySet = await SimplePermissions.checkPermission(Permission.ReadContacts);
+        if (!readContactPermissionAlreadySet) {
+          PermissionStatus status = await SimplePermissions.requestPermission(Permission.ReadContacts);
+          if (status == PermissionStatus.authorized) {
+            // we are good to go
+            print("We have permission");
+          }
+        }*/
+          Iterable<Contact> contacts =
+              await ContactsService.getContacts(withThumbnails: false);
+
+          List<User> users = [];
+          for (Contact i in contacts) {
+            print(i.displayName);
+            User temp = new User(profileName: i.displayName);
+            temp.phoneNumber = "";
+            if (i.phones.length == 1) {
+              temp.cleanAndAddPhoneNumber(i.phones.elementAt(0).value);
+            } else {
+              for (Item num in i.phones) {
+                if (num.label == "mobile") {
+                  temp.cleanAndAddPhoneNumber(num.value);
+                }
+              }
+            }
+            users.add(temp);
+          }
+
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => ImportContactsPage(this.user, users)));
+        },
+        child: ListTile(
+            leading: Icon(Icons.contacts, size: 35),
+            title: Text("Import contacts")));
   }
 
   Widget settingEntry(String title, IconData icon) {
+    return GestureDetector(
+        onTap: () {
+          sampleOnClick();
+        },
+        child: ListTile(
+          leading: Icon(icon, size: 35),
+          title: Text(title),
+        ));
+  }
+
+  Future<dynamic> sampleOnClick() {
     SimpleDialog s = SimpleDialog(
-      title: Text(title,
+      title: Text("Sample onClick",
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
       children: <Widget>[
         SimpleDialogOption(
@@ -136,17 +208,10 @@ class _SettingsPageState extends State<SettingsPage> {
       ],
     );
 
-    return GestureDetector(
-        onTap: () {
-          return showDialog(
-              context: context,
-              builder: (context) {
-                return s;
-              });
-        },
-        child: ListTile(
-          leading: Icon(icon, size: 35),
-          title: Text(title),
-        ));
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return s;
+        });
   }
 }

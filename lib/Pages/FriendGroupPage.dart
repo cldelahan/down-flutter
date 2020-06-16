@@ -78,7 +78,7 @@ class _FriendGroupPageState extends State<FriendGroupPage>
   _onFriendAdded(Event event) async {
     DataSnapshot friendInfo = await dbAllUsers.child(event.snapshot.key).once();
     setState(() {
-      friends.add(User.populateFromDataSnapshot(friendInfo));
+      friends.add(User.populateFromDataSnapshot(friendInfo, user));
     });
     print("Added user");
     print(friendInfo.toString());
@@ -94,7 +94,7 @@ class _FriendGroupPageState extends State<FriendGroupPage>
     List<User> members = [];
     for (int i = 0; i < memberIDs.length; i++) {
       DataSnapshot friendInfo = await dbAllUsers.child(memberIDs[i]).once();
-      members.add(User.populateFromDataSnapshot(friendInfo));
+      members.add(User.populateFromDataSnapshot(friendInfo, user));
     }
     temp.members = members;
 
@@ -108,7 +108,7 @@ class _FriendGroupPageState extends State<FriendGroupPage>
   _onRequestAdded(Event event) async {
     String requestUID = event.snapshot.key;
     DataSnapshot requestInfo = await dbAllUsers.child(requestUID).once();
-    this.requests.add(User.populateFromDataSnapshot(requestInfo));
+    this.requests.add(User.populateFromDataSnapshot(requestInfo, user));
 
     setState(() {});
   }
@@ -208,11 +208,7 @@ class _FriendGroupPageState extends State<FriendGroupPage>
             height: 40.0,
             decoration: new BoxDecoration(
                 shape: BoxShape.circle,
-                image: new DecorationImage(
-                    fit: BoxFit.fill,
-                    image: u.url.startsWith("gs")
-                        ? new FirebaseImage(u.url)
-                        : new NetworkImage(u.url)))),
+                image: u.getImageOfUser())),
         title: Text(u.profileName));
   }
 
@@ -232,11 +228,7 @@ class _FriendGroupPageState extends State<FriendGroupPage>
                 height: 40.0,
                 decoration: new BoxDecoration(
                     shape: BoxShape.circle,
-                    image: new DecorationImage(
-                        fit: BoxFit.fill,
-                        image: u.url.startsWith("gs")
-                            ? new FirebaseImage(u.url)
-                            : new NetworkImage(u.url)))),
+                    image: u.getImageOfUser())),
             title: Text(
               "New Request: " + u.profileName,
               style: TextStyle(

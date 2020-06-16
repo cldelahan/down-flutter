@@ -71,7 +71,7 @@ class _CreateDownInviteScreenState extends State<CreateDownInviteScreen>
   _onFriendAdded(Event event) async {
     DataSnapshot friendInfo = await dbAllUsers.child(event.snapshot.key).once();
     setState(() {
-      friends.add(User.populateFromDataSnapshot(friendInfo));
+      friends.add(User.populateFromDataSnapshot(friendInfo, user));
     });
     print("Added user");
     print(friendInfo.toString());
@@ -87,7 +87,7 @@ class _CreateDownInviteScreenState extends State<CreateDownInviteScreen>
     List<User> members = [];
     for (int i = 0; i < memberIDs.length; i++) {
       DataSnapshot friendInfo = await dbAllUsers.child(memberIDs[i]).once();
-      members.add(User.populateFromDataSnapshot(friendInfo));
+      members.add(User.populateFromDataSnapshot(friendInfo, user));
     }
     temp.members = members;
 
