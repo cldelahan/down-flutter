@@ -39,7 +39,7 @@ class Down {
   int nInvited;
   bool isDown;
 
-  User creator;
+  User creator = new User();
 
   List<User> invitedUsers = [];
 
@@ -67,11 +67,12 @@ class Down {
     } else {
       this.nInvited = this.invitedIDs.length;
     }
+
   }
 
   String getCleanTime() {
     String minute = this.time.minute.toString();
-    String hour = (this.time.hour % 12 + 1).toString();
+    String hour = (this.time.hour % 12) == 0 ? "12" : (this.time.hour % 12).toString();
     // Would need changed if we abandoned the 24-hour approach
     String todayOrTom =
         this.time.day == DateTime.now().day ? "Today" : "Tomorrow";

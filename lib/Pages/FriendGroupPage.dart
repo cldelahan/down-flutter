@@ -25,7 +25,6 @@ import 'package:down/Pages/AddFriendPage.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:down/Pages/ManageGroupPage.dart';
 
-
 class FriendGroupPage extends StatefulWidget {
   FirebaseUser user;
 
@@ -47,13 +46,16 @@ class _FriendGroupPageState extends State<FriendGroupPage>
   DatabaseReference dbGroups;
   DatabaseReference dbRequests;
 
-  bool wantKeepAlive = false;
+  bool wantKeepAlive = true;
 
   _FriendGroupPageState(this.user);
 
   @override
   void initState() {
     super.initState();
+    friends.clear();
+    groups.clear();
+    requests.clear();
     print("Initializing state");
     dbAllUsers = FirebaseDatabase.instance.reference().child("users");
     dbFriends = FirebaseDatabase.instance
@@ -72,8 +74,6 @@ class _FriendGroupPageState extends State<FriendGroupPage>
         .child("users/${user.uid}/requests");
     dbRequests.onChildAdded.listen(_onRequestAdded);
   }
-
-
 
   _onFriendAdded(Event event) async {
     DataSnapshot friendInfo = await dbAllUsers.child(event.snapshot.key).once();
@@ -128,6 +128,32 @@ class _FriendGroupPageState extends State<FriendGroupPage>
     setState(() {});
   }
 
+  _removeFriend(User u) async {
+    // remove from one friend
+    await dbAllUsers.child(this.user.uid).child("friends").child(u.id).remove();
+    // remove from other
+    try {
+      await dbAllUsers
+          .child(u.id)
+          .child("friends")
+          .child(this.user.uid)
+          .remove();
+    } on Exception catch (_) {
+      print("User does not have friend sub-child");
+    }
+    setState(() {});
+  }
+
+  _removeGroup(Group g) async {
+    // remove from personal firebase
+    await dbAllUsers
+        .child(this.user.uid)
+        .child("groups")
+        .child(g.name)
+        .remove();
+    setState(() {});
+  }
+
   _deleteRequest(User u) {
     dbRequests.child(u.id).remove();
     this.requests.remove(u);
@@ -142,6 +168,7 @@ class _FriendGroupPageState extends State<FriendGroupPage>
             length: 2,
             child: Scaffold(
                 appBar: AppBar(
+                  automaticallyImplyLeading: false,
                   backgroundColor: Theme.of(context).primaryColor,
                   bottom: TabBar(
                     tabs: [
@@ -158,10 +185,12 @@ class _FriendGroupPageState extends State<FriendGroupPage>
                 ),
                 floatingActionButton: SpeedDial(
                     animatedIcon: AnimatedIcons.menu_close,
+                    backgroundColor: Theme.of(context).buttonColor,
                     children: [
                       SpeedDialChild(
                         child: Icon(Icons.people),
                         label: "Add group",
+                        backgroundColor: Theme.of(context).buttonColor,
                         onTap: () {
                           Navigator.push(
                               context,
@@ -173,6 +202,7 @@ class _FriendGroupPageState extends State<FriendGroupPage>
                       SpeedDialChild(
                         child: Icon(Icons.person_add),
                         label: "Add friend",
+                        backgroundColor: Theme.of(context).buttonColor,
                         onTap: () {
                           Navigator.push(
                               context,
@@ -186,30 +216,43 @@ class _FriendGroupPageState extends State<FriendGroupPage>
 
   // TODO: Should we combine the requests and the friends together or separate
   Widget buildFriendList() {
-    return Container(
-        child: ListView.builder(
-            // since we are building requests and friends
-            itemCount: requests.length + friends.length,
-            itemBuilder: (BuildContext context, int index) {
-              if (index < requests.length) {
-                // return new request entry
-                return requestEntry(requests[index]);
-              } else {
-                // return new friend entry
-                return friendEntry(friends[index - requests.length]);
-              }
-            }));
+    return requests.length + friends.length == 0
+        ? Center(
+            child: new Text("You have no friends. Add one now!",
+                style: Theme.of(context).textTheme.headline6))
+        : Container(
+            child: ListView.builder(
+                // since we are building requests and friends
+                itemCount: requests.length + friends.length,
+                itemBuilder: (BuildContext context, int index) {
+                  if (index < requests.length) {
+                    // return new request entry
+                    return requestEntry(requests[index]);
+                  } else {
+                    // return new friend entry
+                    return friendEntry(friends[index - requests.length]);
+                  }
+                }));
   }
 
   Widget friendEntry(User u) {
-    return new ListTile(
-        leading: new Container(
-            width: 40.0,
-            height: 40.0,
-            decoration: new BoxDecoration(
-                shape: BoxShape.circle,
-                image: u.getImageOfUser())),
-        title: Text(u.profileName));
+    return new GestureDetector(
+        onLongPress: () {
+          showDialog(
+              context: context,
+              builder: (context) {
+                return removeFriendDialog(u);
+              });
+        },
+        child: ListTile(
+            leading: new Container(
+                width: 40.0,
+                height: 40.0,
+                decoration: new BoxDecoration(
+                    shape: BoxShape.circle,
+                    image: DecorationImage(
+                        fit: BoxFit.cover, image: u.getImageOfUser()))),
+            title: Text(u.profileName)));
   }
 
   Widget requestEntry(User u) {
@@ -228,7 +271,8 @@ class _FriendGroupPageState extends State<FriendGroupPage>
                 height: 40.0,
                 decoration: new BoxDecoration(
                     shape: BoxShape.circle,
-                    image: u.getImageOfUser())),
+                    image: DecorationImage(
+                        fit: BoxFit.cover, image: u.getImageOfUser()))),
             title: Text(
               "New Request: " + u.profileName,
               style: TextStyle(
@@ -238,21 +282,33 @@ class _FriendGroupPageState extends State<FriendGroupPage>
   }
 
   Widget buildGroupList() {
-    return Container(
-        child: ListView.builder(
-            itemCount: groups.length,
-            itemBuilder: (BuildContext context, int index) {
-              if (groups[index] == null) {
-                return new Container(color: Colors.transparent);
-              }
-              return new ListTile(
-                leading: new Container(
-                  child: Icon(Icons.group, size: 40.0),
-                ),
-                title: Text(groups[index].name),
-                subtitle: Text(groups[index].getMemberDisplay()),
-              );
-            }));
+    return groups.length == 0
+        ? Center(
+            child: new Text("You have no groups. Create one now!",
+                style: Theme.of(context).textTheme.headline6))
+        : Container(
+            child: ListView.builder(
+                itemCount: groups.length,
+                itemBuilder: (BuildContext context, int index) {
+                  if (groups[index] == null) {
+                    return new Container(color: Colors.transparent);
+                  }
+                  return new GestureDetector(
+                      onLongPress: () {
+                        showDialog(
+                            context: context,
+                            builder: (context) {
+                              return removeGroupDialog(groups[index]);
+                            });
+                      },
+                      child: ListTile(
+                        leading: new Container(
+                          child: Icon(Icons.group, size: 40.0),
+                        ),
+                        title: Text(groups[index].name),
+                        subtitle: Text(groups[index].getMemberDisplay()),
+                      ));
+                }));
   }
 
   Widget addFriendDialog(User u) {
@@ -270,6 +326,46 @@ class _FriendGroupPageState extends State<FriendGroupPage>
             child: Text("No", style: TextStyle(color: Colors.black)),
             onPressed: () {
               _deleteRequest(u);
+              Navigator.pop(context);
+            })
+      ],
+    );
+  }
+
+  Widget removeFriendDialog(User u) {
+    return SimpleDialog(
+      title: Text("Remove " + u.profileName + " as friend?",
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+      children: <Widget>[
+        SimpleDialogOption(
+            child: Text("Yes", style: TextStyle(color: Colors.black)),
+            onPressed: () {
+              _removeFriend(u);
+              Navigator.pop(context);
+            }),
+        SimpleDialogOption(
+            child: Text("No", style: TextStyle(color: Colors.black)),
+            onPressed: () {
+              Navigator.pop(context);
+            })
+      ],
+    );
+  }
+
+  Widget removeGroupDialog(Group g) {
+    return SimpleDialog(
+      title: Text("Remove " + g.name + "?",
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+      children: <Widget>[
+        SimpleDialogOption(
+            child: Text("Yes", style: TextStyle(color: Colors.black)),
+            onPressed: () {
+              _removeGroup(g);
+              Navigator.pop(context);
+            }),
+        SimpleDialogOption(
+            child: Text("No", style: TextStyle(color: Colors.black)),
+            onPressed: () {
               Navigator.pop(context);
             })
       ],

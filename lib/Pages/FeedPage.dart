@@ -37,21 +37,10 @@ import 'package:flutter/material.dart';
 import '../Models/Down.dart';
 import 'package:down/Models/User.dart';
 import '../Widgets/DownEntry.dart';
-import 'package:down/Pages/DownEntryDetails.dart';
 import 'package:down/Pages/SettingsPage.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
-
-/*Down d1 = Down(title: "Run", creator: "Conner", nInvited: 10, nDown: 5, isDown: false,
-    time: DateTime(2020, 4, 6, 01, 03),
-    timeCreated: DateTime(2020, 4, 6, 05, 40), nSeen: 6, address: "1025 N Charles St. Baltimore MD");
- Down d2 = Down(title: "Eat", creator: "Vance", nInvited: 6, nDown: 2, isDown: false,
-    time: DateTime(2020, 4, 7, 10, 30),
-    timeCreated: DateTime(2020, 4, 6, 22, 10), nSeen: 5);
-Down d3 = Down(title: "Study Brodes", creator: "Susan", nInvited: 3, nDown: 1, isDown: false,
-    time: DateTime(2020, 4, 7, 16, 30),
-    timeCreated: DateTime(2020, 4, 6, 10, 20), nSeen: 2);*/
 
 class FeedPage extends StatefulWidget {
   final FirebaseUser user;
@@ -69,7 +58,7 @@ class _FeedPageState extends State<FeedPage>
   DatabaseReference dbAllDowns;
   DatabaseReference dbAllUsers;
   DatabaseReference dbUserDowns;
-  bool wantKeepAlive = false;
+  bool wantKeepAlive = true;
 
   _FeedPageState(this.user);
 
@@ -142,42 +131,54 @@ class _FeedPageState extends State<FeedPage>
       TODO: Update ^, we decided to do this in DownEntryDetails
      */
 
+    downs.add(newRecievedDown);
+
+    downs.sort( (Down a, Down b) {
+      if (a.time.isAtSameMomentAs(b.time)) {
+        return 0;
+      }
+      // returning -1 is a comes earlier than b
+      if (a.time.isBefore(DateTime.now()) == b.time.isBefore(DateTime.now())) {
+        return a.time.isBefore(b.time) ?  -1 :  1;
+      } else {
+        return a.time.isBefore(DateTime.now()) ?  1 : -1;
+      }
+    });
+
     setState(() {
-      downs.add(newRecievedDown);
     });
   }
 
   Widget makeAppBar() {
     return AppBar(
-      leading: null,
-      iconTheme: IconThemeData(
-        color: Colors.white,
-      ),
-      title: Text("Down",
-        style: TextStyle(
+        automaticallyImplyLeading: false,
+        iconTheme: IconThemeData(
           color: Colors.white,
-          fontFamily: "Lato",
-          fontSize: 45.0,
         ),
-        overflow: TextOverflow.ellipsis,
-      ),
-      centerTitle: true,
-      backgroundColor: Theme.of(context).primaryColor,
-      actions: <Widget>[
-              FlatButton(
-                textColor: Colors.white,
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => SettingsPage(user)),
-                  );
-                },
-                child: Text("Profile"),
-                shape:
-                    CircleBorder(side: BorderSide(color: Colors.transparent)),
-              ),
-            ]
-    );
+        title: Text(
+          "Down",
+          style: TextStyle(
+            color: Colors.white,
+            fontFamily: "Lato",
+            fontSize: 45.0,
+          ),
+          overflow: TextOverflow.ellipsis,
+        ),
+        centerTitle: true,
+        backgroundColor: Theme.of(context).primaryColor,
+        actions: <Widget>[
+          FlatButton(
+            textColor: Colors.white,
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SettingsPage(user)),
+              );
+            },
+            child: Text("Profile"),
+            shape: CircleBorder(side: BorderSide(color: Colors.transparent)),
+          ),
+        ]);
   }
 
   @override
@@ -188,16 +189,19 @@ class _FeedPageState extends State<FeedPage>
       // header defines app-wide appBars
       // isAppTitle includes "appTitle" styled appropriately
       // incProfile includes the users picture as link to access profile page
-      appBar:
-          this.makeAppBar(),
-      body: ListView.builder(
-          itemBuilder: (context, index) {
-            if (downs[index] == null) {
-              return new Container(color: Colors.transparent);
-            }
-            return new DownEntry(this.user, downs[index]);
-          },
-          itemCount: downs.length),
+      appBar: this.makeAppBar(),
+      body: downs.length == 0
+          ? Center(
+              child: new Text("You have no Downs. Add one now!",
+                  style: Theme.of(context).textTheme.headline6))
+          : ListView.builder(
+              itemBuilder: (context, index) {
+                if (downs[index] == null) {
+                  return new Container(color: Colors.transparent);
+                }
+                return new DownEntry(this.user, downs[index]);
+              },
+              itemCount: downs.length),
     );
   }
 }

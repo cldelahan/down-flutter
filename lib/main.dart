@@ -9,10 +9,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 final FirebaseAuth _auth = FirebaseAuth.instance;
 
 void main() {
-  /*
-  runApp(new MaterialApp(
-      home: new MyTabs()
-  ));*/
   runApp(MyApp());
 }
 
@@ -22,15 +18,16 @@ class MyApp extends StatelessWidget {
     SystemChrome.setPreferredOrientations(
         [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
     return MaterialApp(
-      title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
+      title: 'Down',
       theme: ThemeData(
-          // put theme data and colors here
-          //primarySwatch: Colors.blue,
-          primaryColor: Color(0xff26c586),
-          secondaryHeaderColor: Color(0xff26c586),
-          accentColor: Color(0xff17a68b)),
-      // app initially starts off at Login Screen
-      // if there is no need to Login, will go directly to home page
+        primaryColor: Color(0xff10c260),
+        buttonColor: Color(0xff3a82b8),
+        backgroundColor: Color(0xfff0ecf1),
+        accentColor: Color(0x22546a65),
+        dialogBackgroundColor: Color(0xfff0ecf1),
+
+      ),
       home: LoginScreen(),
     );
   }

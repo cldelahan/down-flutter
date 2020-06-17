@@ -29,13 +29,11 @@
 
 import 'package:flutter/material.dart';
 import '../Models/Down.dart';
-import '../Widgets/HeaderWidget.dart';
 import '../Models/User.dart';
 import 'package:down/Models/Status.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:firebase_image/firebase_image.dart';
 
 class DownEntryDetails extends StatefulWidget {
   Down down;
@@ -62,6 +60,8 @@ class _DownEntryDetailsState extends State<DownEntryDetails>
   String _tempStatus;
 
   bool wantKeepAlive = false;
+
+  TextEditingController statusController = new TextEditingController();
 
   _DownEntryDetailsState(this.user, this.down);
 
@@ -90,7 +90,7 @@ class _DownEntryDetailsState extends State<DownEntryDetails>
     print("repopulating the down");
 
     // TODO: Decide if it is worth repopulating the down
-    this.down = Down.populateDown(event.snapshot);
+    //this.down = Down.populateDown(event.snapshot);
 
     this.down.isDown = event.snapshot.value["invited"][user.uid];
 
@@ -118,6 +118,9 @@ class _DownEntryDetailsState extends State<DownEntryDetails>
         tempStatus.poster = poster;
         tempStatus.status = statusData[statusCreator]["text"];
         tempStatus.countLikers(statusData[statusCreator]["likes"]);
+        if (tempStatus.likerUids.contains(user.uid)) {
+          tempStatus.likedByUser = true;
+        }
         print(temp);
         this.statuses.add(tempStatus);
       }
@@ -125,6 +128,24 @@ class _DownEntryDetailsState extends State<DownEntryDetails>
       print(event.snapshot.key);
       print("null status");
     }
+
+    // this is likely not the best way to do this, but we
+    // copy over whether a user is down so we can keep all data in
+    // the down
+    for (int i = 0; i < this.down.invitedUserIsDown.length; i++) {
+      this.down.invitedUsers[i].isDown = this.down.invitedUserIsDown[i];
+    }
+
+    // sort people who are down
+    this.down.invitedUsers.sort((User a, User b) {
+      if (a.isDown && !b.isDown) {
+        return -1;
+      } else if (!a.isDown && b.isDown) {
+        return 1;
+      } else {
+        return a.profileName.compareTo(b.profileName);
+      }
+    });
 
     if (!mounted) {
       return;
@@ -137,73 +158,56 @@ class _DownEntryDetailsState extends State<DownEntryDetails>
 
   Widget statusEntry(Status s) {
     return Padding(
-        padding: const EdgeInsets.only(right: 5, top: 15, left: 5),
+        padding: EdgeInsets.fromLTRB(5.0, 15.0, 5.0, 0.0),
         child: Container(
-          color: Colors.white,
-          child: Column(children: <Widget>[
-            Row(children: <Widget>[
-              Container(
-                  width: 40.0,
-                  height: 40.0,
-                  decoration: new BoxDecoration(
-                      shape: BoxShape.circle,
-                      image: s.poster.getImageOfUser())),
-              SizedBox(width: 10.0),
-              Text(s.poster.profileName,
-                  style: TextStyle(
-                      fontSize: 20, color: Colors.black, fontFamily: "Lato")),
-            ]),
-            Row(children: <Widget>[
-              SizedBox(
-                height: 50.0,
-                width: 20.0,
-              ),
-              Flexible(
-                  child: Text(s.status,
-                      style: TextStyle(
-                          fontSize: 20,
-                          color: Colors.black,
-                          fontFamily: "Lato")))
-            ]),
-            Row(children: <Widget>[
-              Flexible(fit: FlexFit.tight, child: SizedBox()),
-              Text(s.nUpvoted.toString(),
-                  style: TextStyle(
-                      fontSize: 20, color: Colors.black, fontFamily: "Lato")),
-              Container(
-                // TODO: There is a weird bug where it takes two taps to unlike
-                /*
-                  Why?: Likely because the SetState() function runs faster than
-                  we update the database, so while we refresh the local version,
-                  we replace it with a out-of-date later version.
-                 */
-                child: GestureDetector(
-                    onTap: () async {
-                      s.likedByUser = !s.likedByUser;
-                      // add the user to the likers
-                      if (s.likedByUser == true) {
-                        await dbDown
-                            .child("status/${s.poster.id}/likes")
-                            .update({this.user.uid: 0});
-                      } else {
-                        // it was false so delete
-                        await dbDown
-                            .child(
-                                "status/${s.poster.id}/likes/${this.user.uid}")
-                            .remove();
-                      }
-                      setState(() {});
-                    },
-                    child: Icon(Icons.arrow_drop_up,
-                        color: s.likedByUser
-                            ? Theme.of(context).primaryColor
-                            : Colors.black,
-                        size: 30.0)),
-                alignment: Alignment.bottomRight,
-              )
-            ])
-          ]),
-        ));
+            decoration: BoxDecoration(
+                border:
+                    Border.all(color: Theme.of(context).accentColor, width: 1),
+                borderRadius: BorderRadius.circular(10)),
+            child: ListTile(
+                leading: Container(
+                    width: 30.0,
+                    height: 30.0,
+                    decoration: new BoxDecoration(
+                        shape: BoxShape.circle,
+                        image: DecorationImage(
+                            fit: BoxFit.cover,
+                            image: s.poster.getImageOfUser()))),
+                title: Text(s.poster.profileName,
+                    style: Theme.of(context).textTheme.headline6),
+                subtitle: Text(s.status,
+                    style: Theme.of(context).textTheme.bodyText2),
+                trailing: buildUpvoteButton(s))));
+  }
+
+  Widget buildUpvoteButton(Status s) {
+    return Container(
+        width: 30,
+        child: Column(children: <Widget>[
+          Text(s.nUpvoted.toString(),
+              style: Theme.of(context).textTheme.bodyText2),
+          GestureDetector(
+              onTap: () async {
+                //bool newLikeStatus = s.altLikeByUser();
+                // add the user to the likers
+                if (!s.likedByUser) {
+                  await dbDown
+                      .child("status/${s.poster.id}/likes")
+                      .update({this.user.uid: 0});
+                } else {
+                  // it was false so delete
+                  await dbDown
+                      .child("status/${s.poster.id}/likes/${this.user.uid}")
+                      .remove();
+                }
+                setState(() {});
+              },
+              child: Icon(Icons.arrow_drop_up,
+                  color: s.likedByUser
+                      ? Theme.of(context).primaryColor
+                      : Colors.black,
+                  size: 30.0)),
+        ]));
   }
 
   Widget addStatusField() {
@@ -212,6 +216,7 @@ class _DownEntryDetailsState extends State<DownEntryDetails>
         child: Form(
             key: _statusKey,
             child: TextFormField(
+              controller: statusController,
               decoration: InputDecoration(
                 hintText: "Add / Update status",
                 suffixIcon: new GestureDetector(
@@ -224,7 +229,7 @@ class _DownEntryDetailsState extends State<DownEntryDetails>
                         dbDown
                             .child("status")
                             .child(this.user.uid)
-                            .update({'text': this._tempStatus});
+                            .update({'text': statusController.value.text.toString()});
 
                         // remove all likers (so people aren't liking new statuses)
                         dbDown
@@ -234,13 +239,15 @@ class _DownEntryDetailsState extends State<DownEntryDetails>
                             .remove();
 
                         setState(() {});
+
+                        statusController.clear();
                       }
                     },
                     child: Icon(Icons.send)),
               ),
-              onChanged: (value) {
+              /*onChanged: (value) {
                 this._tempStatus = value;
-              },
+              },*/
               validator: (value) {
                 if (value == null || value.length == 0) {
                   return "Invalid name";
@@ -250,100 +257,48 @@ class _DownEntryDetailsState extends State<DownEntryDetails>
   }
 
   Widget buildFriendInviteSummaryDisplay() {
+    // first we sort the users so the people who are down appear first
+    // else we sort alphabetically
+    this.down.invitedUsers.sort((User a, User b) {
+      if (a.isDown && !b.isDown) {
+        return -1;
+      } else if (!a.isDown && b.isDown) {
+        return 1;
+      } else {
+        return a.profileName.compareTo(b.profileName);
+      }
+    });
+
     return Padding(
         padding: EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0.0),
         child: Container(
-            height: 150,
-            width: 1000,
-            decoration: BoxDecoration(
-                border: Border.symmetric(
-                    vertical: BorderSide(
-              width: 2.0,
-              color: Colors.black,
-            ))),
+            height: 40,
             child: ListView.builder(
-                scrollDirection: Axis.vertical,
+                scrollDirection: Axis.horizontal,
                 shrinkWrap: true,
                 itemCount: this.down.invitedUsers.length,
                 itemBuilder: (BuildContext context, int index) {
                   if (this.down.invitedUsers[index] == null) {
                     return new Container(color: Colors.transparent);
                   }
-
-                  print(this.down.invitedUserIsDown);
                   return new Container(
-                      color: this.down.invitedUserIsDown[index]
-                          ? Theme.of(context).primaryColor
-                          : Colors.white,
-                      child: ListTile(
-                          leading: new Container(
-                              width: 40.0,
-                              height: 40.0,
-                              decoration: new BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  image:  this
-                                              .down
-                                              .invitedUsers[index]
-                                              .getImageOfUser())),
-                          title:
-                              Text(this.down.invitedUsers[index].profileName)));
-                  /*
-                  return new Container(
-                      width: 70.0,
-                      child: new Column(children: <Widget>[
-                        new Container(
-                          width: 50,
-                          height: 50,
-                          decoration: new BoxDecoration(
-                            image: DecorationImage(
-                                this
-                                .down
-                                .invitedUsers[index]
-                                .url
-                                .startsWith("gs")
-                                ? new FirebaseImage(
-                                this.down.invitedUsers[index].url)
-                                : new NetworkImage(
-                                this.down.invitedUsers[index].url))),
-                          ),
-                        new Text(
-                          this.down.invitedUsers[index].profileName,
-                          softWrap: true,
-                        )
-                      ]));*/
+                      width: 40.0,
+                      height: 40.0,
+                      decoration: new BoxDecoration(
+                          color: Colors.black,
+                          shape: BoxShape.circle,
+                          image: DecorationImage(
+                              image: this
+                                  .down
+                                  .invitedUsers[index]
+                                  .getImageOfUser(),
+                              fit: BoxFit.cover,
+                              colorFilter: this.down.invitedUsers[index].isDown
+                                  ? null
+                                  : new ColorFilter.mode(
+                                      Colors.black.withOpacity(0.5),
+                                      BlendMode.dstATop))));
                 })));
-  }
-
-  Widget buildDownHeading() {
-    return Container(
-      // color: down.isDown ? Theme.of(context).primaryColor : Colors.white,
-      color: Colors.white,
-      child: Column(children: <Widget>[
-        Text(down.title,
-            style: TextStyle(
-                fontSize: 30,
-                color: Colors.black,
-                fontWeight: FontWeight.bold)),
-        SizedBox(height: 5.0),
-        Row(children: <Widget>[
-          (down.address != null)
-              ? Text(down.address,
-                  style: TextStyle(
-                    fontSize: 20,
-                    color: Colors.black,
-                  ))
-              : Container(),
-        ]),
-        SizedBox(height: 5.0),
-        Row(children: <Widget>[
-          Text(down.getCleanTime(),
-              style: TextStyle(fontSize: 20, color: Colors.black)),
-        ]),
-        SizedBox(height: 30.0),
-        // spacing between time and Down / Havent Seen / Invited
-        Text(down.getGoingSummary()),
-      ]),
-    );
   }
 
   Widget buildStatusDisplay() {
@@ -360,23 +315,70 @@ class _DownEntryDetailsState extends State<DownEntryDetails>
 
   @override
   Widget build(BuildContext context) {
-    AppBar appBar = header(context,
-        user: this.user, isAppTitle: true, disappearedBackButton: false);
     return Scaffold(
-        appBar: appBar,
-        body: Padding(
-            padding: const EdgeInsets.only(right: 5, top: 15, left: 5),
-            child: SingleChildScrollView(
-                child: Container(
-                    /*color: down.isDown
-                        ? Theme.of(context).primaryColor
-                        : Colors.white,*/
-                    color: Colors.white,
-                    child: Column(children: <Widget>[
-                      buildDownHeading(),
-                      buildFriendInviteSummaryDisplay(),
-                      buildStatusDisplay(),
-                      addStatusField(),
-                    ])))));
+        body: SafeArea(
+            child: Padding(
+                padding: const EdgeInsets.only(right: 5, top: 15, left: 5),
+                child: SingleChildScrollView(
+                    child: Container(
+                        decoration: BoxDecoration(
+                            color: Theme.of(context).backgroundColor,
+                            border: Border.all(
+                                color: Theme.of(context).accentColor, width: 1),
+                            borderRadius: BorderRadius.circular(10)),
+                        child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: <Widget>[
+                              ListTile(
+                                title: Text(this.down.creator.profileName,
+                                    style:
+                                        Theme.of(context).textTheme.bodyText1),
+                                subtitle: Text(this.down.title,
+                                    style:
+                                        Theme.of(context).textTheme.headline4),
+                                trailing: new Stack(children: <Widget>[
+                                  new Container(
+                                      width: 40.0,
+                                      height: 40.0,
+                                      decoration: new BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          image: DecorationImage(
+                                              fit: BoxFit.cover,
+                                              image: this
+                                                  .down
+                                                  .creator
+                                                  .getImageOfUser()))),
+                                  new Positioned(
+                                      right: 0,
+                                      bottom: 0,
+                                      child: new Container(
+                                          padding: EdgeInsets.all(1),
+                                          decoration: new BoxDecoration(
+                                            color: Theme.of(context)
+                                                .backgroundColor,
+                                            borderRadius:
+                                                BorderRadius.circular(6),
+                                          ),
+                                          constraints: new BoxConstraints(
+                                              minWidth: 12, minHeight: 12),
+                                          child: new Text(
+                                              this.down.nInvited.toString(),
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .bodyText1)))
+                                ]),
+                              ),
+                              Container(
+                                  alignment: Alignment.topLeft,
+                                  child: Padding(
+                                      padding: EdgeInsets.only(left: 20.0),
+                                      child: Text(down.getCleanTime(),
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .headline6))),
+                              buildFriendInviteSummaryDisplay(),
+                              buildStatusDisplay(),
+                              addStatusField(),
+                            ]))))));
   }
 }

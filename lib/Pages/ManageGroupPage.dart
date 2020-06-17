@@ -115,7 +115,9 @@ class _ManageGroupPageState extends State<ManageGroupPage> {
                         height: 40.0,
                         decoration: new BoxDecoration(
                             shape: BoxShape.circle,
-                            image: this._friends[index].getImageOfUser())),
+                            image: DecorationImage(
+                                fit: BoxFit.cover,
+                                image: this._friends[index].getImageOfUser()))),
                     title: Text(this._friends[index].profileName)));
           },
         )));
@@ -175,11 +177,12 @@ class _ManageGroupPageState extends State<ManageGroupPage> {
                         new Container(
                             height: 40.0,
                             width: 40.0,
-                                decoration: new BoxDecoration(
-                                    shape: BoxShape.circle,
-                                        image:
-                                        _chosenFriends[index]
-                                        .getImageOfUser())),
+                            decoration: new BoxDecoration(
+                                shape: BoxShape.circle,
+                                image: DecorationImage(
+                                    fit: BoxFit.cover,
+                                    image: _chosenFriends[index]
+                                        .getImageOfUser()))),
                         new Text(
                           this._chosenFriends[index].profileName,
                           softWrap: true,
@@ -198,7 +201,7 @@ class _ManageGroupPageState extends State<ManageGroupPage> {
     return Scaffold(
         body: SafeArea(
             child: new SingleChildScrollView(
-        child: Column(children: <Widget>[
+                child: Column(children: <Widget>[
       new Form(key: _groupKey, child: chooseNameField()),
       buildChosenFriendsDisplay(),
       buildFriendList(),

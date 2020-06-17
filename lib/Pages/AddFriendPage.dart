@@ -165,15 +165,10 @@ class _AddFriendPageState extends State<AddFriendPage> {
                         decoration: new BoxDecoration(
                             shape: BoxShape.circle,
                             image: new DecorationImage(
-                                fit: BoxFit.fill,
-                                image: this
-                                        ._searchedUsers[index]
-                                        .url
-                                        .startsWith("gs")
-                                    ? new FirebaseImage(
-                                        this._searchedUsers[index].url)
-                                    : new NetworkImage(
-                                        this._searchedUsers[index].url)))),
+                              fit: BoxFit.cover,
+                              image:
+                                  this._searchedUsers[index].getImageOfUser(),
+                            ))),
                     title: Text(this._searchedUsers[index].profileName)));
           },
         )));

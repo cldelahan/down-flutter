@@ -85,7 +85,10 @@ class _SettingsPageState extends State<SettingsPage> {
                               height: 60.0,
                               decoration: new BoxDecoration(
                                   shape: BoxShape.circle,
-                                  image: this.currentUser.getImageOfUser()))),
+                                  image: DecorationImage(
+                                      fit: BoxFit.cover,
+                                      image:
+                                          this.currentUser.getImageOfUser())))),
                       //SizedBox(width: 10.0),
                       Text(
                         currentUser.profileName,

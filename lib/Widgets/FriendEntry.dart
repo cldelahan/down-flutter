@@ -28,8 +28,8 @@ class FriendEntry extends StatelessWidget {
                           decoration: new BoxDecoration(
                               shape: BoxShape.circle,
                               image: new DecorationImage(
-                                  fit: BoxFit.fill,
-                                  image: new NetworkImage(friend.url)
+                                  fit: BoxFit.cover,
+                                  image: friend.getImageOfUser(),
                               )
                           )
                       ),

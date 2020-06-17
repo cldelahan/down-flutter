@@ -52,15 +52,14 @@ class LoginScreen extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                       builder: (context) => UserInfoPage(
-                        user: user,
-                      )));
+                            user: user,
+                          )));
             } else {
               // else jump directly to the homepage (tab view)
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) =>
-                          HomePage(
+                      builder: (context) => HomePage(
                             user,
                           )));
             }
@@ -116,15 +115,14 @@ class LoginScreen extends StatelessWidget {
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) => UserInfoPage(
-                                          user: user,
-                                        )));
+                                              user: user,
+                                            )));
                               } else {
                                 // else jump directly to the homepage (tab view)
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) =>
-                                            HomePage(
+                                        builder: (context) => HomePage(
                                               user,
                                             )));
                               }
@@ -140,12 +138,10 @@ class LoginScreen extends StatelessWidget {
         codeAutoRetrievalTimeout: null);
   }
 
-
   void dispose() {
     _codeController.dispose();
     _phoneController.dispose();
   }
-
 
   Widget showPhoneNumberInput() {
     return new Padding(
@@ -161,8 +157,7 @@ class LoginScreen extends StatelessWidget {
             // Can be used if multiple countries are desired
             // (since PhoneNumber number above adds country selector)
           },
-        )
-    );
+        ));
   }
 
   Widget showLogo() {
@@ -170,9 +165,7 @@ class LoginScreen extends StatelessWidget {
         tag: 'hero',
         child: Padding(
             padding: EdgeInsets.fromLTRB(0.0, 70.0, 0.0, 0.0),
-            child: Image.asset("assets/images/DownLogo.png")
-            )
-    );
+            child: Image.asset("assets/images/DownLogo.png")));
   }
 
   void _autoSignin(BuildContext context) async {
@@ -188,12 +181,10 @@ class LoginScreen extends StatelessWidget {
           context,
           MaterialPageRoute(
               builder: (context) => HomePage(
-                curUser,
-              )));
+                    curUser,
+                  )));
     }
-
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -202,9 +193,9 @@ class LoginScreen extends StatelessWidget {
     }
     _autoSignin(context);
     return Scaffold(
-        body: SingleChildScrollView(
-      child: Container(
-        padding: EdgeInsets.all(32),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.all(32),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,
@@ -225,7 +216,7 @@ class LoginScreen extends StatelessWidget {
                   padding: EdgeInsets.all(16),
                   onPressed: () {
                     // Hardcoded for US
-                    final phone = "+1"+_phoneController.text.trim();
+                    final phone = "+1" + _phoneController.text.trim();
                     loginUser(phone, context);
                   },
                   color: Theme.of(context).primaryColor,

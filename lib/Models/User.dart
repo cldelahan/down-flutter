@@ -7,7 +7,7 @@ import 'package:firebase_image/firebase_image.dart';
 // allows for better importing into Firebase
 class User {
   String id;
-  String profileName;
+  String profileName = "";
   String username;
   String url;
   String email;
@@ -15,7 +15,8 @@ class User {
   String phoneNumber;
   bool addedByPhone = false;
   bool invite = false;
-  DecorationImage profileImage = null;
+  bool isDown = false;
+  ImageProvider profileImage = null;
 
   User({
     this.id,
@@ -26,7 +27,20 @@ class User {
     this.email,
     this.token,
     this.addedByPhone,
-  });
+  }) {
+    id = "";
+    profileName = "";
+    username = "";
+    url = "";
+    email = "";
+    token = "";
+    phoneNumber = "";
+    invite = false;
+    isDown = false;
+    profileImage = null;
+    addedByPhone = false;
+
+  }
 
   void cleanAndAddPhoneNumber(String number) {
     number = number.replaceAll("(", "");
@@ -57,21 +71,16 @@ class User {
     their image is stored. We then wrap the image in a decoration image (
     a more general representation) so we can return it
    */
-  DecorationImage getImageOfUser() {
+  ImageProvider getImageOfUser() {
+
     if (profileImage == null) {
       if (this.addedByPhone) {
-        profileImage = DecorationImage(
-            fit: BoxFit.fill,
-            image: AssetImage('assets/images/phoneIcon.png'));
+        profileImage = AssetImage('assets/images/phoneIcon.png');
       }
       else if (this.url.startsWith("gs")) {
-        profileImage = DecorationImage(
-            fit: BoxFit.fill,
-            image: FirebaseImage(this.url));
+        profileImage = FirebaseImage(this.url);
       } else {
-        profileImage = DecorationImage(
-            fit: BoxFit.fill,
-            image: NetworkImage(this.url));
+        profileImage = NetworkImage(this.url);
       }
     }
     return profileImage;
@@ -85,6 +94,8 @@ class User {
     Map entry = ds.value;
 
     User temp = new User();
+
+    temp.isDown = false;
 
     // fill out standard fields of the user
     try {

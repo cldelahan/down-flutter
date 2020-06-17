@@ -72,113 +72,84 @@ class _DownEntryState extends State<DownEntry> {
 
   @override
   Widget build(BuildContext context) {
-    return handmadeBuild(down, context);
-    //return cardBuild(down, context);
+    return modernBuild(context);
   }
 
-  Widget cardBuild(Down down, BuildContext context) {
-    return Padding(
-        padding: const EdgeInsets.only(right: 5, top: 15, left: 5),
-        child: Card(
-            color: down.isDown ? Theme.of(context).primaryColor : Colors.white,
-            child: Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
-              ListTile(
-                leading: Container(
-                    width: 40.0,
-                    height: 20.0,
-                    decoration: new BoxDecoration(
-                        shape: BoxShape.circle,
-                        image: new DecorationImage(
-                            fit: BoxFit.fill,
-                            image: this.down.creator.url.startsWith("gs")
-                                ? new FirebaseImage(this.down.creator.url)
-                                : new NetworkImage(this.down.creator.url)))),
-                title: Text(this.down.title),
-                subtitle: Text(this.down.getCleanTime().toString() +
-                    '\n' +
-                    this.down.nDown.toString() +
-                    " down\t" +
-                    this.down.nInvited.toString() +
-                    " invited"),
-              ),
-              ButtonBar(children: <Widget>[
-                FlatButton(
-                    child: const Text("Add to Calendar"),
-                    onPressed: () {
-                      print("You pressed ATC");
-                    }),
-                FlatButton(
-                    child: const Text("Ignore"),
-                    onPressed: () {
-                      print("You pressed Ig");
-                    })
-              ])
-            ])));
+  void _changeDownStatus() {
+    dbAllDowns.child(down.id).child("invited").update({user.uid: !down.isDown});
+    setState(() {
+      down.isDown = !down.isDown;
+    });
   }
 
-  Widget handmadeBuild(Down down, BuildContext context) {
-    print("Down toString(): " + this.down.toString());
-    return Padding(
-      padding: const EdgeInsets.only(right: 5, top: 15, left: 5),
-      child: GestureDetector(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) {
-                return new DownEntryDetails(this.user, down);
-              },
-              fullscreenDialog: true,
-            ),
-          );
+  void _navigateToDownDetails() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) {
+          return DownEntryDetails(this.user, down);
         },
-        onDoubleTap: () {
-          dbAllDowns.child(down.id).child("invited").update({
-            user.uid : !down.isDown
-          });
-          setState(() {
-            down.isDown = !down.isDown;
-          });
-        },
-        child: Container(
-          color: down.isDown ? Theme.of(context).primaryColor : Colors.white,
-          child: Column(children: <Widget>[
-            Text(down.title,
-                style: TextStyle(
-                    fontSize: 30,
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold)),
-            Row(children: <Widget>[
-              Text(down.getCleanTime(),
-                  style: TextStyle(fontSize: 25, color: Colors.grey)),
-              Flexible(fit: FlexFit.tight, child: SizedBox()),
-              Text(down.nInvited.toString() + " invited",
-                  style: TextStyle(
-                    fontSize: 20.0,
-                    color: Colors.grey,
-                  ))
-            ]),
-            Row(children: <Widget>[
-              Text(down.creator.profileName,
-                  style: TextStyle(
-                    fontSize: 20.0,
-                    color: Colors.black,
-                  )),
-              Flexible(fit: FlexFit.tight, child: SizedBox()),
-              Text(
-                  DateTime.now()
-                          .difference(down.timeCreated)
-                          .inHours
-                          .toString() +
-                      "h ago",
-                  style: TextStyle(fontSize: 10.0, color: Colors.grey)),
-              Flexible(fit: FlexFit.tight, child: SizedBox()),
-              Text("+" + down.nDown.toString(),
-                  style: TextStyle(fontSize: 10.0, color: Colors.black))
-            ])
-          ]),
-        ),
+        fullscreenDialog: true,
       ),
     );
+  }
+
+  Widget modernBuild(context) {
+    return Padding(
+        padding: EdgeInsets.fromLTRB(5.0, 15.0, 5.0, 0.0),
+        child: GestureDetector(
+            onTap: _navigateToDownDetails,
+            onDoubleTap: _changeDownStatus,
+            child: Container(
+                decoration: BoxDecoration(
+                    color: down.isDown
+                        ? Theme.of(context).primaryColor.withOpacity(down.time.isBefore(DateTime.now()) ? 0.25 : 1)
+                        : Theme.of(context).backgroundColor,
+                    border: Border.all(
+                        color: Theme.of(context).accentColor, width: 1),
+                    borderRadius: BorderRadius.circular(10)),
+                child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
+                      ListTile(
+                        title: Text(this.down.creator.profileName,
+                            style: Theme.of(context).textTheme.bodyText1),
+                        subtitle: Text(this.down.title,
+                            style: Theme.of(context).textTheme.headline4),
+                        trailing: new Stack(children: <Widget>[
+                          new Container(
+                              width: 40.0,
+                              height: 40.0,
+                              decoration: new BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  image: DecorationImage(
+                                      fit: BoxFit.cover,
+                                      image:
+                                          this.down.creator.getImageOfUser()))),
+                          new Positioned(
+                              right: 0,
+                              bottom: 0,
+                              child: new Container(
+                                  padding: EdgeInsets.all(1),
+                                  decoration: new BoxDecoration(
+                                    color: Theme.of(context).backgroundColor,
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  constraints: new BoxConstraints(
+                                      minWidth: 12, minHeight: 12),
+                                  child: new Text(this.down.nInvited.toString(),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyText1)))
+                        ]),
+                      ),
+                      Container(
+                          alignment: Alignment.topLeft,
+                          child: Padding(
+                              padding: EdgeInsets.only(left: 20.0),
+                              child: Text(down.getCleanTime(),
+                                  style:
+                                      Theme.of(context).textTheme.headline6)))
+                    ]))));
   }
 }

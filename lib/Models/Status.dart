@@ -29,6 +29,16 @@ class Status {
     }
   }
 
+  bool altLikeByUser() {
+    if (likedByUser) {
+      nUpvoted--;
+    } else {
+      nUpvoted++;
+    }
+    likedByUser = !likedByUser;
+    return likedByUser;
+  }
+
 
   int compareTo(Status other) {
     if (this.nUpvoted > other.nUpvoted) {
