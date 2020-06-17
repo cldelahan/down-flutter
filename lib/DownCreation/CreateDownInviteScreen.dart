@@ -143,7 +143,27 @@ class _CreateDownInviteScreenState extends State<CreateDownInviteScreen>
                                 color: Colors.black,
                               ))),
                       buildFriendList(),
+                      showSwipeDown()
                     ])))));
+  }
+
+
+  Widget showSwipeDown() {
+    return Padding(
+        padding: EdgeInsets.fromLTRB(0.0, 50.0, 0.0, 0.0),
+        child: new Column (
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget> [
+              new Icon(Icons.keyboard_arrow_down,
+                  color: Theme.of(context).primaryColor),
+              new Icon(Icons.keyboard_arrow_down,
+                  color: Theme.of(context).primaryColor),
+              new Icon(Icons.keyboard_arrow_down,
+                  color: Theme.of(context).primaryColor),
+
+            ]
+        )
+    );
   }
 
   void _uploadToFirebase() {
@@ -172,7 +192,14 @@ class _CreateDownInviteScreenState extends State<CreateDownInviteScreen>
       'title': this._builtDown.title,
       'timeCreated': this._builtDown.timeCreated.toString(),
       'time': this._builtDown.time.toString(),
+      'address' : this._builtDown.address
     });
+
+    /*if (this._builtDown.address != null || this._builtDown.address != "") {
+      newChild.set({
+        'address': this._builtDown.address
+      });
+    }*/
 
     print(newChild.key);
 

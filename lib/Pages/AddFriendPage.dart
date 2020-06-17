@@ -12,9 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:down/Models/User.dart';
-import 'package:firebase_image/firebase_image.dart';
-import 'package:down/Models/Group.dart';
-import 'package:down/Widgets/ProgressWidget.dart';
+
 
 class AddFriendPage extends StatefulWidget {
   FirebaseUser user;

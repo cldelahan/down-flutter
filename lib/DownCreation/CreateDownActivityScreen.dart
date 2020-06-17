@@ -52,7 +52,6 @@ class _CreateDownActivityScreenState extends State<CreateDownActivityScreen>
         name: "Spa day", icon: Icons.spa, usingIcon: true));
   }
 
-
   @override
   void initState() {
     super.initState();
@@ -77,8 +76,20 @@ class _CreateDownActivityScreenState extends State<CreateDownActivityScreen>
     });
   }
 
-
   Widget submitForm() {
+    return Padding(
+        padding: EdgeInsets.fromLTRB(0.0, 50.0, 0.0, 0.0),
+        child: new Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              new Icon(Icons.keyboard_arrow_down,
+                  color: Theme.of(context).primaryColor),
+              new Icon(Icons.keyboard_arrow_down,
+                  color: Theme.of(context).primaryColor),
+              new Icon(Icons.keyboard_arrow_down,
+                  color: Theme.of(context).primaryColor),
+            ]));
+    /*
     return Padding(
         padding: const EdgeInsets.fromLTRB(0.0, 50.0, 0.0, 0.0),
         child: new Material(
@@ -86,23 +97,21 @@ class _CreateDownActivityScreenState extends State<CreateDownActivityScreen>
             child: new Center(
                 child: new RaisedButton(
                     child: Text("Continue"),
-                    color: Theme
-                        .of(context)
-                        .primaryColor,
+                    color: Theme.of(context).primaryColor,
                     onPressed: () {
                       // before submitting make sure the name is valid
                       if (!_formKey.currentState.validate()) {
                         return;
                       }
-                      print("Down name: " + _nameController.value.text.toString());
-                      this._builtDown.title = _nameController.value.text.toString();
+                      print("Down name: " +
+                          _nameController.value.text.toString());
+                      this._builtDown.title =
+                          _nameController.value.text.toString();
 
                       // move to the next page
                       Navigator.of(context).push(_createRoute());
-                    }
-                ))));
+                    }))));*/
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -111,71 +120,95 @@ class _CreateDownActivityScreenState extends State<CreateDownActivityScreen>
         // can wrap in "SafeArea" to not interfere with notification bar
         body: SafeArea(
             child: SingleChildScrollView(
-              child: Padding(
-                    padding: const EdgeInsets.fromLTRB(10.0, 25.0, 10.0, 25.0),
-                    child: Column(children: <Widget>[
-                      Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            showDownNameInput(),
-                            Text('Near you',
-                                style: TextStyle(
-                                    color: Colors.black.withOpacity(.7),
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 20)),
-                            SizedBox(
-                              height: 3,
-                            ),
-                            Container(
-                              height: 120,
-                              child:
-                                  recommendedActivityLine(sponsoredActivities),
-                            )
-                          ]),
-                      Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Text('Recommended Activities',
-                                style: TextStyle(
-                                    color: Colors.black.withOpacity(.7),
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 20)),
-                            SizedBox(
-                              height: 3,
-                            ),
-                            Container(
-                              height: 120,
-                              child: recommendedActivityLine(generalActivities),
-                            )
-                          ,
-                          submitForm()]),
-                    ])))));
+                child: GestureDetector(
+                    onVerticalDragUpdate: (dragUpdateFeatures) {
+                      if (dragUpdateFeatures.delta.dy < -8) {
+                        // We update firebase with new downs
+                        print("updating");
+                        if (!_formKey.currentState.validate()) {
+                          return;
+                        }
+                        this._builtDown.title =
+                            _nameController.value.text.toString();
+
+                        // move to the next page
+                        Navigator.of(context).push(_createRoute());
+                      }
+                    },
+                    child: Padding(
+                        padding:
+                            const EdgeInsets.fromLTRB(10.0, 25.0, 10.0, 25.0),
+                        child: Column(children: <Widget>[
+                          Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                showDownNameInput(),
+                                Text('Near you',
+                                    style: TextStyle(
+                                        color: Colors.black.withOpacity(.7),
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 20)),
+                                SizedBox(
+                                  height: 3,
+                                ),
+                                Container(
+                                  height: 120,
+                                  child: recommendedActivityLine(
+                                      sponsoredActivities),
+                                )
+                              ]),
+                          Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Text('Recommended Activities',
+                                    style: TextStyle(
+                                        color: Colors.black.withOpacity(.7),
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 20)),
+                                SizedBox(
+                                  height: 3,
+                                ),
+                                Container(
+                                  height: 120,
+                                  child: recommendedActivityLine(
+                                      generalActivities),
+                                ),
+                              ]),
+                          submitForm()
+                        ]))))));
   }
 
   Widget showDownNameInput() {
     return Padding(
         padding: const EdgeInsets.fromLTRB(10.0, 25.0, 10.0, 25.0),
         child: new Material(
-          child: new Form(
-            key: _formKey,
-            child: TextFormField(
-                controller: _nameController,
-                maxLines: 1,
-                keyboardType: TextInputType.text,
-                autofocus: false,
-                onChanged: (value) {
-                  this._builtDown.title = value;
-                },
-                /*
+            child: new Form(
+                key: _formKey,
+                child: TextFormField(
+                    controller: _nameController,
+                    maxLines: 1,
+                    keyboardType: TextInputType.text,
+                    autofocus: false,
+                    onFieldSubmitted: (String s) {
+                      if (!_formKey.currentState.validate()) {
+                        return;
+                      }
+                      this._builtDown.title =
+                          _nameController.value.text.toString();
+
+                      // move to the next page
+                      Navigator.of(context).push(_createRoute());
+                    },
+                    /*
                   This could (and should) be updated to avoid titles such as racist, extremist, and titles condoning violence
                    */
-                validator: (value) {
-                  if (value == null || value.length == 0) {
-                    return "invalid down name";
-                  }
-                },
-                decoration:
-                    InputDecoration(hintText: "What do you want to do?")))));
+                    validator: (value) {
+                      if (value == null || value.length == 0) {
+                        return "invalid down name";
+                      }
+                    },
+                    decoration: InputDecoration(
+                        hintText: "What do you want to do?")))));
   }
 
   Widget recommendedActivityLine(List<RecommendedActivity> raList) {
@@ -201,6 +234,7 @@ class _CreateDownActivityScreenState extends State<CreateDownActivityScreen>
         child: GestureDetector(
           onTap: () {
             this._builtDown.title = ra.name;
+            this._builtDown.address = ra.address;
             print(ra.name);
             Navigator.of(context).push(_createRoute());
           },

@@ -32,6 +32,7 @@ import '../Models/Down.dart';
 import '../Models/User.dart';
 import 'package:down/Models/Status.dart';
 
+import 'package:url_launcher/url_launcher.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 
@@ -226,10 +227,8 @@ class _DownEntryDetailsState extends State<DownEntryDetails>
                         return;
                       } else {
                         print("send a status");
-                        dbDown
-                            .child("status")
-                            .child(this.user.uid)
-                            .update({'text': statusController.value.text.toString()});
+                        dbDown.child("status").child(this.user.uid).update(
+                            {'text': statusController.value.text.toString()});
 
                         // remove all likers (so people aren't liking new statuses)
                         dbDown
@@ -333,9 +332,26 @@ class _DownEntryDetailsState extends State<DownEntryDetails>
                                 title: Text(this.down.creator.profileName,
                                     style:
                                         Theme.of(context).textTheme.bodyText1),
-                                subtitle: Text(this.down.title,
-                                    style:
-                                        Theme.of(context).textTheme.headline4),
+                                subtitle: InkWell(
+                                    onTap: () async {
+                                      if (down.address == null ||
+                                          down.address == "") {
+                                        return;
+                                      }
+                                      String query =
+                                          Uri.encodeComponent(down.address);
+                                      String googleUrl =
+                                          "https://www.google.com/maps/search/?api=1&query=$query";
+                                      await launch(googleUrl);
+                                    },
+                                    child: Text(this.down.title,
+                                        style: new TextStyle(
+                                            color:
+                                                Theme.of(context).primaryColor,
+                                            fontSize: Theme.of(context)
+                                                .textTheme
+                                                .headline4
+                                                .fontSize))),
                                 trailing: new Stack(children: <Widget>[
                                   new Container(
                                       width: 40.0,

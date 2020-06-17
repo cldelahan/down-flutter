@@ -24,14 +24,14 @@ class Down {
   final dbDowns = FirebaseDatabase.instance.reference().child('downs');
 
   // raw values from database
-  final String id;
+  String id;
   String title;
   List<String> invitedIDs = [];
   List<bool> invitedUserIsDown = [];
   DateTime time;
   DateTime timeCreated;
-  final String address;
-  final String advertId;
+  String address;
+  String advertId;
 
   // derived values from database
   String creatorID;
