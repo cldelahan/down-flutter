@@ -6,6 +6,7 @@ import '../Models/User.dart';
 import 'package:down/Pages/FeedPage.dart';
 import 'package:down/DownCreation/CreateDownActivityScreen.dart';
 import 'package:down/Pages/FriendGroupPage.dart';
+import 'package:down/Pages/BusinessPage.dart';
 import '../Widgets/MyApp.dart';
 
 
@@ -41,7 +42,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   void initState() {
     super.initState();
     setState((){});
-    tabController = new TabController(vsync: this, length: 3);
+    tabController = new TabController(vsync: this, length: 4);
   }
 
   @override
@@ -63,6 +64,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                   new Tab(child: new Icon(Icons.home)),
                   new Tab(child: new Icon(Icons.arrow_downward)),
                   new Tab(child: new Icon(Icons.group)),
+                  new Tab(child: new Icon(Icons.business))
                   /*new Tab(child: new IconTheme(
                     data: new IconThemeData(
                         color: color1),
@@ -84,6 +86,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               new FeedPage(this.user),
               new CreateDownActivityScreen(this.user),
               new FriendGroupPage(this.user),
+              new BusinessPage(this.user)
               //new SearchPage()
             ]
         )

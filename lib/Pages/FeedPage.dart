@@ -34,9 +34,13 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:down/Models/Organization.dart';
 import '../Models/Down.dart';
 import 'package:down/Models/User.dart';
-import '../Widgets/DownEntry.dart';
+import 'package:down/Models/SponsoredDown.dart';
+import 'package:down/Widgets/DownEntry.dart';
+import 'package:down/Widgets/DownEntryExp.dart';
+import 'package:down/Widgets/SponsoredDownEntry.dart';
 import 'package:down/Pages/SettingsPage.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -54,10 +58,16 @@ class FeedPage extends StatefulWidget {
 class _FeedPageState extends State<FeedPage>
     with AutomaticKeepAliveClientMixin {
   FirebaseUser user;
+
   List<Down> downs = [];
+  List<String> subscriptions = [];
+  List<SponsoredDown> sponsoredDowns = [];
+
   DatabaseReference dbAllDowns;
   DatabaseReference dbAllUsers;
+  DatabaseReference dbAllSponsoredDowns;
   DatabaseReference dbUserDowns;
+  DatabaseReference dbUserSubscriptions;
   bool wantKeepAlive = true;
 
   _FeedPageState(this.user);
@@ -65,12 +75,19 @@ class _FeedPageState extends State<FeedPage>
   @override
   void initState() {
     super.initState();
-    print("Initializing feed page");
+
     dbAllDowns = FirebaseDatabase.instance.reference().child("down");
     dbAllUsers = FirebaseDatabase.instance.reference().child("users");
+    dbAllSponsoredDowns = FirebaseDatabase.instance.reference().child("sponsored/downs");
     dbUserDowns =
         FirebaseDatabase.instance.reference().child("users/${user.uid}/downs");
+    dbUserSubscriptions = FirebaseDatabase.instance
+        .reference()
+        .child("users/${user.uid}/subscribed");
+
+
     dbUserDowns.onChildAdded.listen(_onDownAdded);
+    dbUserSubscriptions.onValue.listen(_getSubscriptions);
   }
 
   _onDownAdded(Event event) async {
@@ -133,21 +150,51 @@ class _FeedPageState extends State<FeedPage>
 
     downs.add(newRecievedDown);
 
-    downs.sort( (Down a, Down b) {
+    downs.sort((Down a, Down b) {
       if (a.time.isAtSameMomentAs(b.time)) {
         return 0;
       }
       // returning -1 is a comes earlier than b
       if (a.time.isBefore(DateTime.now()) == b.time.isBefore(DateTime.now())) {
-        return a.time.isBefore(b.time) ?  -1 :  1;
+        return a.time.isBefore(b.time) ? -1 : 1;
       } else {
-        return a.time.isBefore(DateTime.now()) ?  1 : -1;
+        return a.time.isBefore(DateTime.now()) ? 1 : -1;
       }
     });
 
-    setState(() {
-    });
+    if (this.mounted) {
+      setState(() {});
+    }
   }
+
+  _getSubscriptions(Event event) async {
+    // get users subscriptions
+    DataSnapshot userSubscriptionData = event.snapshot;
+    Map subData = Map<String, int>.from(userSubscriptionData.value);
+    subscriptions = subData.keys.toList();
+
+    // register for each subscription a listener for downs posted in that chanel
+    for (String i in subscriptions) {
+      dbAllSponsoredDowns.child(i).onChildAdded.listen(_onSponsoredDownAdded);
+    }
+
+
+  }
+
+  _onSponsoredDownAdded(Event event) async {
+    // we got a sponsored down
+    SponsoredDown temp = SponsoredDown.populateDown(event.snapshot);
+    // is sponsoredDowns.add function atomic?
+
+    // get the organization's data
+    DataSnapshot orgData = await FirebaseDatabase.instance.reference().child("sponsored/organizations/${temp.organizationID}").once();
+    Organization creatorOrg = Organization.populateFromDataSnapshot(orgData);
+    temp.organization = creatorOrg;
+
+    this.sponsoredDowns.add(temp);
+
+  }
+
 
   Widget makeAppBar() {
     return AppBar(
@@ -190,18 +237,19 @@ class _FeedPageState extends State<FeedPage>
       // isAppTitle includes "appTitle" styled appropriately
       // incProfile includes the users picture as link to access profile page
       appBar: this.makeAppBar(),
-      body: downs.length == 0
+      body: downs.length + sponsoredDowns.length == 0
           ? Center(
               child: new Text("You have no Downs. Add one now!",
                   style: Theme.of(context).textTheme.headline6))
           : ListView.builder(
               itemBuilder: (context, index) {
-                if (downs[index] == null) {
-                  return new Container(color: Colors.transparent);
+                if (index >= downs.length){
+                  return new SponsoredDownEntry(this.user, sponsoredDowns[index - downs.length]);
+                } else {
+                  return new DownEntryExp(this.user, downs[index]);
                 }
-                return new DownEntry(this.user, downs[index]);
               },
-              itemCount: downs.length),
+              itemCount: downs.length + sponsoredDowns.length),
     );
   }
 }

@@ -26,6 +26,8 @@ class MyApp extends StatelessWidget {
         backgroundColor: Color(0xfff0ecf1),
         accentColor: Color(0x22546a65),
         dialogBackgroundColor: Color(0xfff0ecf1),
+        // color for businesses
+        cardColor: Color(0xff74ccf2)
 
       ),
       home: LoginScreen(),

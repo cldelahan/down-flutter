@@ -45,7 +45,10 @@ import '../Models/Down.dart';
 import '../Pages/DownEntryDetails.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_image/firebase_image.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:firebase_database/firebase_database.dart';
+import '../Models/User.dart';
+import 'package:down/Models/Status.dart';
 
 class DownEntry extends StatefulWidget {
   Down down;
@@ -60,96 +63,126 @@ class DownEntry extends StatefulWidget {
 class _DownEntryState extends State<DownEntry> {
   Down down;
   FirebaseUser user;
+  bool isDetailed = false;
 
   _DownEntryState(this.user, this.down);
 
   DatabaseReference dbAllDowns;
+  DatabaseReference dbAllUsers;
+
+  bool wantKeepAlive = false;
+
 
   @override
   void initState() {
     dbAllDowns = FirebaseDatabase.instance.reference().child("down");
+    dbAllUsers = FirebaseDatabase.instance.reference().child("users");
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return modernBuild(context);
-  }
+    @override
+    Widget build(BuildContext context) {
+      return modernBuild(context);
+    }
 
-  void _changeDownStatus() {
-    dbAllDowns.child(down.id).child("invited").update({user.uid: !down.isDown});
-    setState(() {
-      down.isDown = !down.isDown;
-    });
-  }
+    void _changeDownStatus() {
+      dbAllDowns.child(down.id).child("invited").update(
+          {user.uid: !down.isDown});
+      setState(() {
+        down.isDown = !down.isDown;
+      });
+    }
 
-  void _navigateToDownDetails() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) {
-          return DownEntryDetails(this.user, down);
-        },
-        fullscreenDialog: true,
-      ),
-    );
-  }
 
-  Widget modernBuild(context) {
-    return Padding(
-        padding: EdgeInsets.fromLTRB(5.0, 15.0, 5.0, 0.0),
-        child: GestureDetector(
-            onTap: _navigateToDownDetails,
-            onDoubleTap: _changeDownStatus,
-            child: Container(
-                decoration: BoxDecoration(
-                    color: down.isDown
-                        ? Theme.of(context).primaryColor.withOpacity(down.time.isBefore(DateTime.now()) ? 0.25 : 1)
-                        : Theme.of(context).backgroundColor,
-                    border: Border.all(
-                        color: Theme.of(context).accentColor, width: 1),
-                    borderRadius: BorderRadius.circular(10)),
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: <Widget>[
-                      ListTile(
-                        title: Text(this.down.creator.profileName,
-                            style: Theme.of(context).textTheme.bodyText1),
-                        subtitle: Text(this.down.title,
-                            style: Theme.of(context).textTheme.headline4),
-                        trailing: new Stack(children: <Widget>[
-                          new Container(
-                              width: 40.0,
-                              height: 40.0,
-                              decoration: new BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  image: DecorationImage(
-                                      fit: BoxFit.cover,
-                                      image:
-                                          this.down.creator.getImageOfUser()))),
-                          new Positioned(
-                              right: 0,
-                              bottom: 0,
-                              child: new Container(
-                                  padding: EdgeInsets.all(1),
-                                  decoration: new BoxDecoration(
-                                    color: Theme.of(context).backgroundColor,
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  constraints: new BoxConstraints(
-                                      minWidth: 12, minHeight: 12),
-                                  child: new Text(this.down.nInvited.toString(),
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyText1)))
-                        ]),
-                      ),
-                      Container(
-                          alignment: Alignment.topLeft,
-                          child: Padding(
-                              padding: EdgeInsets.only(left: 20.0),
-                              child: Text(down.getCleanTime(),
-                                  style:
-                                      Theme.of(context).textTheme.headline6)))
-                    ]))));
+    void _navigateToDownDetails() {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) {
+            return DownEntryDetails(this.user, down);
+          },
+          fullscreenDialog: true,
+        ),
+      );
+    }
+
+    Widget modernBuild(context) {
+      return Padding(
+          padding: EdgeInsets.fromLTRB(5.0, 15.0, 5.0, 0.0),
+          child: GestureDetector(
+              onTap: _navigateToDownDetails,
+              onDoubleTap: _changeDownStatus,
+              child: AnimatedContainer(
+                  duration: Duration(seconds: 1),
+                  decoration: BoxDecoration(
+                      color: down.isDown
+                          ? Theme
+                          .of(context)
+                          .primaryColor
+                          .withOpacity(
+                          down.time.isBefore(DateTime.now()) ? 0.25 : 1)
+                          : Theme
+                          .of(context)
+                          .backgroundColor,
+                      border: Border.all(
+                          color: Theme
+                              .of(context)
+                              .accentColor, width: 1),
+                      borderRadius: BorderRadius.circular(10)),
+                  child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: <Widget>[
+                        ListTile(
+                          title: Text(this.down.creator.profileName,
+                              style: Theme
+                                  .of(context)
+                                  .textTheme
+                                  .bodyText1),
+                          subtitle: Text(this.down.title,
+                              style: Theme
+                                  .of(context)
+                                  .textTheme
+                                  .headline4),
+                          trailing: new Stack(children: <Widget>[
+                            new Container(
+                                width: 40.0,
+                                height: 40.0,
+                                decoration: new BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    image: DecorationImage(
+                                        fit: BoxFit.cover,
+                                        image:
+                                        this.down.creator.getImageOfUser()))),
+                            new Positioned(
+                                right: 0,
+                                bottom: 0,
+                                child: new Container(
+                                    padding: EdgeInsets.all(1),
+                                    decoration: new BoxDecoration(
+                                      color: Theme
+                                          .of(context)
+                                          .backgroundColor,
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    constraints: new BoxConstraints(
+                                        minWidth: 12, minHeight: 12),
+                                    child: new Text(
+                                        this.down.nInvited.toString(),
+                                        style: Theme
+                                            .of(context)
+                                            .textTheme
+                                            .bodyText1)))
+                          ]),
+                        ),
+                        Container(
+                            alignment: Alignment.topLeft,
+                            child: Padding(
+                                padding: EdgeInsets.only(left: 20.0),
+                                child: Text(down.getCleanTime(),
+                                    style:
+                                    Theme
+                                        .of(context)
+                                        .textTheme
+                                        .headline6)))
+                      ]))));
+    }
   }
-}

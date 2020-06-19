@@ -60,8 +60,7 @@ class _CreateDownInviteScreenState extends State<CreateDownInviteScreen>
         .child("users/${user.uid}/friends");
     dbGroups =
         FirebaseDatabase.instance.reference().child("users/${user.uid}/groups");
-    dbDowns =
-        FirebaseDatabase.instance.reference().child("down");
+    dbDowns = FirebaseDatabase.instance.reference().child("down");
 
     // registering listeners to populate friends / groups lists
     dbFriends.onChildAdded.listen(_onFriendAdded);
@@ -80,7 +79,7 @@ class _CreateDownInviteScreenState extends State<CreateDownInviteScreen>
   _onGroupAdded(Event event) async {
     Group temp = new Group(name: event.snapshot.key);
     List<String> memberIDs =
-    List<String>.from(event.snapshot.value.keys.toList());
+        List<String>.from(event.snapshot.value.keys.toList());
     temp.memberIDs = memberIDs;
     temp.nMembers = memberIDs.length;
 
@@ -91,9 +90,11 @@ class _CreateDownInviteScreenState extends State<CreateDownInviteScreen>
     }
     temp.members = members;
 
-    setState(() {
-      groups.add(temp);
-    });
+    if (this.mounted) {
+      setState(() {
+        groups.add(temp);
+      });
+    }
     print("Added group");
     print("Event key: " + event.snapshot.key);
   }
@@ -102,68 +103,64 @@ class _CreateDownInviteScreenState extends State<CreateDownInviteScreen>
   Widget build(BuildContext context) {
     return new Scaffold(
         body: SafeArea(
-          // notice, this gesture detector was homemade
-          // we can change this to something more formal (shows intermedaite sliding)
-          // but wanted to keep this to show some flexibility
-          // TODO: change to more rigorous approach
+            // notice, this gesture detector was homemade
+            // we can change this to something more formal (shows intermedaite sliding)
+            // but wanted to keep this to show some flexibility
+            // TODO: change to more rigorous approach
             child: GestureDetector(
                 onVerticalDragUpdate: (dragUpdateFeatures) {
                   if (dragUpdateFeatures.delta.dy < -8) {
                     // We update firebase with new downs
                     _uploadToFirebase();
                     Navigator.pushAndRemoveUntil(
-                      context, MaterialPageRoute(
-                        builder: (context) => HomePage(this.user)),
-                          (Route<dynamic> route) => false,
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => HomePage(this.user)),
+                      (Route<dynamic> route) => false,
                     );
                   }
-
                 },
                 child: Material(
                     child: new Column(children: <Widget>[
-                      new Padding(
-                          padding: EdgeInsets.fromLTRB(16.0, 50.0, 16.0, 0.0),
-                          child: Text("Groups",
-                              textAlign: TextAlign.right,
-                              style: TextStyle(
-                                fontSize: 16.0,
-                                fontFamily: "Lato",
-                                fontWeight: FontWeight.w300,
-                                color: Colors.black,
-                              ))),
-                      buildGroupList(),
-                      new Padding(
-                          padding: EdgeInsets.fromLTRB(16.0, 50.0, 16.0, 0.0),
-                          child: Text("Friends",
-                              textAlign: TextAlign.right,
-                              style: TextStyle(
-                                fontSize: 16.0,
-                                fontFamily: "Lato",
-                                fontWeight: FontWeight.w300,
-                                color: Colors.black,
-                              ))),
-                      buildFriendList(),
-                      showSwipeDown()
-                    ])))));
+                  new Padding(
+                      padding: EdgeInsets.fromLTRB(16.0, 50.0, 16.0, 0.0),
+                      child: Text("Groups",
+                          textAlign: TextAlign.right,
+                          style: TextStyle(
+                            fontSize: 16.0,
+                            fontFamily: "Lato",
+                            fontWeight: FontWeight.w300,
+                            color: Colors.black,
+                          ))),
+                  buildGroupList(),
+                  new Padding(
+                      padding: EdgeInsets.fromLTRB(16.0, 50.0, 16.0, 0.0),
+                      child: Text("Friends",
+                          textAlign: TextAlign.right,
+                          style: TextStyle(
+                            fontSize: 16.0,
+                            fontFamily: "Lato",
+                            fontWeight: FontWeight.w300,
+                            color: Colors.black,
+                          ))),
+                  buildFriendList(),
+                  showSwipeDown()
+                ])))));
   }
-
 
   Widget showSwipeDown() {
     return Padding(
         padding: EdgeInsets.fromLTRB(0.0, 50.0, 0.0, 0.0),
-        child: new Column (
+        child: new Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget> [
+            children: <Widget>[
               new Icon(Icons.keyboard_arrow_down,
                   color: Theme.of(context).primaryColor),
               new Icon(Icons.keyboard_arrow_down,
                   color: Theme.of(context).primaryColor),
               new Icon(Icons.keyboard_arrow_down,
                   color: Theme.of(context).primaryColor),
-
-            ]
-        )
-    );
+            ]));
   }
 
   void _uploadToFirebase() {
@@ -182,7 +179,6 @@ class _CreateDownInviteScreenState extends State<CreateDownInviteScreen>
     }
     invitedIds.add(this.user.uid);
 
-
     List<String> allInvitedUids = invitedIds.toList();
     print(allInvitedUids.toString());
 
@@ -192,7 +188,7 @@ class _CreateDownInviteScreenState extends State<CreateDownInviteScreen>
       'title': this._builtDown.title,
       'timeCreated': this._builtDown.timeCreated.toString(),
       'time': this._builtDown.time.toString(),
-      'address' : this._builtDown.address
+      'address': this._builtDown.address
     });
 
     /*if (this._builtDown.address != null || this._builtDown.address != "") {
@@ -203,12 +199,13 @@ class _CreateDownInviteScreenState extends State<CreateDownInviteScreen>
 
     print(newChild.key);
 
-
     for (int i = 0; i < allInvitedUids.length; i++) {
       // for each user, add the downs to their page
       // newChild.key is the new down uid
-      dbAllUsers.child(allInvitedUids[i]).child("downs").update({
-        newChild.key: 0});
+      dbAllUsers
+          .child(allInvitedUids[i])
+          .child("downs")
+          .update({newChild.key: 0});
       // then, on the down page, in the invited field, add a child
       // with the key their UID, then 0 denoting not down, and
       // 1 denoting down
@@ -220,66 +217,67 @@ class _CreateDownInviteScreenState extends State<CreateDownInviteScreen>
     }
   }
 
-Widget buildFriendList() {
-  return Container(
-      child: ListView.builder(
-          scrollDirection: Axis.vertical,
-          shrinkWrap: true,
-          itemCount: friends.length,
-          itemBuilder: (BuildContext context, int index) {
-            return new CheckboxListTile(
+  Widget buildFriendList() {
+    return Container(
+        child: ListView.builder(
+            scrollDirection: Axis.vertical,
+            shrinkWrap: true,
+            itemCount: friends.length,
+            itemBuilder: (BuildContext context, int index) {
+              return new CheckboxListTile(
+                  controlAffinity: ListTileControlAffinity.leading,
+                  onChanged: (bool newValue) {
+                    setState(() {
+                      friends[index].invite = newValue;
+                    });
+                  },
+                  value: friends[index].invite,
+                  title: Text(friends[index].profileName));
+            }));
+  }
+
+  Widget buildGroupList() {
+    return Container(
+        child: ListView.builder(
+            scrollDirection: Axis.vertical,
+            shrinkWrap: true,
+            itemCount: groups.length,
+            itemBuilder: (BuildContext context, int index) {
+              if (groups[index] == null) {
+                return new Container(color: Colors.transparent);
+              }
+              return new CheckboxListTile(
                 controlAffinity: ListTileControlAffinity.leading,
                 onChanged: (bool newValue) {
                   setState(() {
-                    friends[index].invite = newValue;
+                    groups[index].invite = newValue;
                   });
                 },
-                value: friends[index].invite,
-                title: Text(friends[index].profileName));
-          }));
-}
-
-Widget buildGroupList() {
-  return Container(
-      child: ListView.builder(
-          scrollDirection: Axis.vertical,
-          shrinkWrap: true,
-          itemCount: groups.length,
-          itemBuilder: (BuildContext context, int index) {
-            if (groups[index] == null) {
-              return new Container(color: Colors.transparent);
-            }
-            return new CheckboxListTile(
-              controlAffinity: ListTileControlAffinity.leading,
-              onChanged: (bool newValue) {
-                setState(() {
-                  groups[index].invite = newValue;
-                });
-              },
-              value: groups[index].invite,
-              title: Text(groups[index].name),
-              subtitle: Text(groups[index].getMemberDisplay()),
-            );
-          }));
-}
+                value: groups[index].invite,
+                title: Text(groups[index].name),
+                subtitle: Text(groups[index].getMemberDisplay()),
+              );
+            }));
+  }
 
 // this is creating a route between two pages
-Route _createRoute() {
-  return PageRouteBuilder(
-    pageBuilder: (context, animation, secondaryAnimation) =>
-        CreateDownTimeScreen(this.user, this._builtDown),
-    transitionsBuilder: (context, animation, secondaryAnimation, child) {
-      // a "tween" allows us to create an animation between the two pages
-      var begin = Offset(0.0, 1.0);
-      var end = Offset.zero;
-      var curve = Curves.ease;
-      // this tween defined the movement between the two pages plus the
-      // sigmoid curve effect
-      var tween =
-      Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+  Route _createRoute() {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) =>
+          CreateDownTimeScreen(this.user, this._builtDown),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        // a "tween" allows us to create an animation between the two pages
+        var begin = Offset(0.0, 1.0);
+        var end = Offset.zero;
+        var curve = Curves.ease;
+        // this tween defined the movement between the two pages plus the
+        // sigmoid curve effect
+        var tween =
+            Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
 
-      var offsetAnimation = animation.drive(tween);
-      return SlideTransition(position: offsetAnimation, child: child);
-    },
-  );
-}}
+        var offsetAnimation = animation.drive(tween);
+        return SlideTransition(position: offsetAnimation, child: child);
+      },
+    );
+  }
+}

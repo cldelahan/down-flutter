@@ -70,10 +70,12 @@ class _CreateDownActivityScreenState extends State<CreateDownActivityScreen>
     print(event.snapshot.value);
 
     // add recommended activities
-    setState(() {
-      sponsoredActivities
-          .add(RecommendedActivity.populateFromSnapshot(event.snapshot));
-    });
+    if (mounted) {
+      setState(() {
+        sponsoredActivities
+            .add(RecommendedActivity.populateFromSnapshot(event.snapshot));
+      });
+    }
   }
 
   Widget submitForm() {
@@ -89,28 +91,6 @@ class _CreateDownActivityScreenState extends State<CreateDownActivityScreen>
               new Icon(Icons.keyboard_arrow_down,
                   color: Theme.of(context).primaryColor),
             ]));
-    /*
-    return Padding(
-        padding: const EdgeInsets.fromLTRB(0.0, 50.0, 0.0, 0.0),
-        child: new Material(
-            color: Colors.transparent,
-            child: new Center(
-                child: new RaisedButton(
-                    child: Text("Continue"),
-                    color: Theme.of(context).primaryColor,
-                    onPressed: () {
-                      // before submitting make sure the name is valid
-                      if (!_formKey.currentState.validate()) {
-                        return;
-                      }
-                      print("Down name: " +
-                          _nameController.value.text.toString());
-                      this._builtDown.title =
-                          _nameController.value.text.toString();
-
-                      // move to the next page
-                      Navigator.of(context).push(_createRoute());
-                    }))));*/
   }
 
   @override

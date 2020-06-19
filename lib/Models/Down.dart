@@ -17,7 +17,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:down/Models/Status.dart';
 import 'package:down/Models/User.dart';
 
-// template class to model a user
+// template class to model a down
 // allows for better importing into Firebase
 class Down {
   // firebase vars

@@ -64,7 +64,9 @@ class _SettingsPageState extends State<SettingsPage> {
     this.currentUser = temp;
     print(this.currentUser.email);
 
-    setState(() {});
+    if (this.mounted) {
+      setState(() {});
+    }
   }
 
   @override
@@ -164,7 +166,8 @@ class _SettingsPageState extends State<SettingsPage> {
           List<User> users = [];
           for (Contact i in contacts) {
             print(i.displayName);
-            User temp = new User(profileName: i.displayName);
+            User temp = new User();
+            temp.profileName = i.displayName;
             temp.phoneNumber = "";
             if (i.phones.length == 1) {
               temp.cleanAndAddPhoneNumber(i.phones.elementAt(0).value);
