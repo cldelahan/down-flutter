@@ -344,32 +344,32 @@ class _DownEntryExpState extends State<DownEntryExp> {
 
   Widget buildUpvoteButton(Status s) {
     return Container(
-        width: 30,
+    width: 30,
+        child: GestureDetector(
+            onTap: () async {
+              //bool newLikeStatus = s.altLikeByUser();
+              // add the user to the likers
+              if (!s.likedByUser) {
+                await dbDown
+                    .child("status/${s.poster.id}/likes")
+                    .update({this.user.uid: 0});
+              } else {
+                // it was false so delete
+                await dbDown
+                    .child("status/${s.poster.id}/likes/${this.user.uid}")
+                    .remove();
+              }
+              setState(() {});
+            },
         child: Column(children: <Widget>[
           Text(s.nUpvoted.toString(),
               style: Theme.of(context).textTheme.bodyText2),
-          GestureDetector(
-              onTap: () async {
-                //bool newLikeStatus = s.altLikeByUser();
-                // add the user to the likers
-                if (!s.likedByUser) {
-                  await dbDown
-                      .child("status/${s.poster.id}/likes")
-                      .update({this.user.uid: 0});
-                } else {
-                  // it was false so delete
-                  await dbDown
-                      .child("status/${s.poster.id}/likes/${this.user.uid}")
-                      .remove();
-                }
-                setState(() {});
-              },
-              child: Icon(Icons.arrow_drop_up,
+              Icon(Icons.arrow_drop_up,
                   color: s.likedByUser
                       ? Theme.of(context).primaryColor
                       : Colors.black,
-                  size: 30.0)),
-        ]));
+                  size: 30.0),
+        ])));
   }
 
   Widget addStatusField() {
