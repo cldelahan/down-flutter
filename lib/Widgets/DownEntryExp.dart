@@ -47,7 +47,7 @@ class _DownEntryExpState extends State<DownEntryExp> {
 
   String _tempStatus;
 
-  bool wantKeepAlive = false;
+  bool wantKeepAlive = true;
 
   TextEditingController statusController = new TextEditingController();
 
@@ -158,6 +158,44 @@ class _DownEntryExpState extends State<DownEntryExp> {
     //TODO: best way to get user data linked with status data
   }
 
+
+  void _deleteDown() {
+    // deleting the down
+    // must first remove from everyone's down
+    for (User i in this.down.invitedUsers) {
+      dbAllUsers.child(i.id).child("downs").child(down.id).remove();
+    }
+    // then delete down entry
+    dbDown.child(down.id).remove();
+  }
+
+  Widget _offerDeletion() {
+    if (this.down.creatorID == user.uid && this.down.time.isAfter(DateTime.now())) {
+      SimpleDialog s = SimpleDialog(
+        title: Text("Delete down?",
+            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+        children: <Widget>[
+          SimpleDialogOption(
+              child: Text("Yes", style: TextStyle(color: Colors.black)),
+              onPressed: () {
+                _deleteDown();
+                Navigator.pop(context);
+              }),
+          SimpleDialogOption(
+              child: Text("No", style: TextStyle(color: Colors.black)),
+              onPressed: () {
+                Navigator.pop(context);
+              })
+        ],
+      );
+      showDialog(
+          context: context,
+          builder: (context) {
+            return s;
+          });
+    }
+  }
+
   void _navigateToDownDetails() {
     isDetailed = !isDetailed;
     setState((){});
@@ -178,6 +216,7 @@ class _DownEntryExpState extends State<DownEntryExp> {
         child: GestureDetector(
             onTap: _navigateToDownDetails,
             onDoubleTap: _changeDownStatus,
+            onLongPress: _offerDeletion,
             child: Container(
                 decoration: BoxDecoration(
                     color: down.isDown

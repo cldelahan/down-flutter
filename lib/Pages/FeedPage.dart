@@ -39,6 +39,7 @@ import '../Models/Down.dart';
 import 'package:down/Models/User.dart';
 import 'package:down/Models/SponsoredDown.dart';
 import 'package:down/Widgets/DownEntry.dart';
+import 'package:down/Pages/FeedbackPage.dart';
 import 'package:down/Widgets/DownEntryExp.dart';
 import 'package:down/Widgets/SponsoredDownEntry.dart';
 import 'package:down/Pages/SettingsPage.dart';
@@ -68,7 +69,7 @@ class _FeedPageState extends State<FeedPage>
   DatabaseReference dbAllSponsoredDowns;
   DatabaseReference dbUserDowns;
   DatabaseReference dbUserSubscriptions;
-  bool wantKeepAlive = true;
+  bool wantKeepAlive = false;
 
   _FeedPageState(this.user);
 
@@ -78,13 +79,13 @@ class _FeedPageState extends State<FeedPage>
 
     dbAllDowns = FirebaseDatabase.instance.reference().child("down");
     dbAllUsers = FirebaseDatabase.instance.reference().child("users");
-    dbAllSponsoredDowns = FirebaseDatabase.instance.reference().child("sponsored/downs");
+    dbAllSponsoredDowns =
+        FirebaseDatabase.instance.reference().child("sponsored/downs");
     dbUserDowns =
         FirebaseDatabase.instance.reference().child("users/${user.uid}/downs");
     dbUserSubscriptions = FirebaseDatabase.instance
         .reference()
         .child("users/${user.uid}/subscribed");
-
 
     dbUserDowns.onChildAdded.listen(_onDownAdded);
     dbUserSubscriptions.onValue.listen(_getSubscriptions);
@@ -177,8 +178,6 @@ class _FeedPageState extends State<FeedPage>
     for (String i in subscriptions) {
       dbAllSponsoredDowns.child(i).onChildAdded.listen(_onSponsoredDownAdded);
     }
-
-
   }
 
   _onSponsoredDownAdded(Event event) async {
@@ -187,14 +186,15 @@ class _FeedPageState extends State<FeedPage>
     // is sponsoredDowns.add function atomic?
 
     // get the organization's data
-    DataSnapshot orgData = await FirebaseDatabase.instance.reference().child("sponsored/organizations/${temp.organizationID}").once();
+    DataSnapshot orgData = await FirebaseDatabase.instance
+        .reference()
+        .child("sponsored/organizations/${temp.organizationID}")
+        .once();
     Organization creatorOrg = Organization.populateFromDataSnapshot(orgData);
     temp.organization = creatorOrg;
 
     this.sponsoredDowns.add(temp);
-
   }
-
 
   Widget makeAppBar() {
     return AppBar(
@@ -237,14 +237,22 @@ class _FeedPageState extends State<FeedPage>
       // isAppTitle includes "appTitle" styled appropriately
       // incProfile includes the users picture as link to access profile page
       appBar: this.makeAppBar(),
+      bottomNavigationBar: RaisedButton(
+        child: Text("Give Feedback"),
+        onPressed: () {
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => FeedbackPage(user)));
+        },
+      ),
       body: downs.length + sponsoredDowns.length == 0
           ? Center(
               child: new Text("You have no Downs. Add one now!",
                   style: Theme.of(context).textTheme.headline6))
           : ListView.builder(
               itemBuilder: (context, index) {
-                if (index >= downs.length){
-                  return new SponsoredDownEntry(this.user, sponsoredDowns[index - downs.length]);
+                if (index >= downs.length) {
+                  return new SponsoredDownEntry(
+                      this.user, sponsoredDowns[index - downs.length]);
                 } else {
                   return new DownEntryExp(this.user, downs[index]);
                 }
