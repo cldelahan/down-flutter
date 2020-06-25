@@ -78,7 +78,7 @@ class _FriendGroupPageState extends State<FriendGroupPage>
   _onFriendAdded(Event event) async {
     DataSnapshot friendInfo = await dbAllUsers.child(event.snapshot.key).once();
     setState(() {
-      friends.add(User.populateFromDataSnapshot(friendInfo, user));
+      friends.add(User.populateFromDataSnapshotAndPhone(friendInfo, user));
     });
     print("Added user");
     print(friendInfo.toString());
@@ -94,7 +94,7 @@ class _FriendGroupPageState extends State<FriendGroupPage>
     List<User> members = [];
     for (int i = 0; i < memberIDs.length; i++) {
       DataSnapshot friendInfo = await dbAllUsers.child(memberIDs[i]).once();
-      members.add(User.populateFromDataSnapshot(friendInfo, user));
+      members.add(User.populateFromDataSnapshotAndPhone(friendInfo, user));
     }
     temp.members = members;
 
@@ -108,7 +108,7 @@ class _FriendGroupPageState extends State<FriendGroupPage>
   _onRequestAdded(Event event) async {
     String requestUID = event.snapshot.key;
     DataSnapshot requestInfo = await dbAllUsers.child(requestUID).once();
-    this.requests.add(User.populateFromDataSnapshot(requestInfo, user));
+    this.requests.add(User.populateFromDataSnapshot(requestInfo));
 
     setState(() {});
   }

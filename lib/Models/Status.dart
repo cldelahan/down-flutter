@@ -7,44 +7,54 @@
   Notes:
 
  */
+
 import 'package:down/Models/User.dart';
 
 class Status {
-  User poster;
+
   String status;
-  Set<String> likerUids = new Set();
-  int nUpvoted = 0;
+  Set<String> likerUIDs;
+  // is duplicated data but is much easier
+  User poster;
 
-  bool likedByUser = false;
 
+  Status({
+    this.status = "",
+});
 
-  void countLikers(Map likeData) {
-    if (likeData == null) {
-      nUpvoted = 0;
-      return;
-    }
-    for (String liker in likeData.keys) {
-      likerUids.add(liker);
-      nUpvoted += 1;
-    }
+  void setLikerUIDs (Set<String> likerUIDs) {
+    this.likerUIDs = likerUIDs;
   }
 
-  bool altLikeByUser() {
-    if (likedByUser) {
-      nUpvoted--;
-    } else {
-      nUpvoted++;
-    }
-    likedByUser = !likedByUser;
-    return likedByUser;
+  int getNumberOfLikes() {
+    return likerUIDs.length;
   }
-
 
   int compareTo(Status other) {
-    if (this.nUpvoted > other.nUpvoted) {
+    if (this.getNumberOfLikes() > other.getNumberOfLikes()) {
       return 1;
     } else {
       return 0;
     }
+  }
+
+  bool isLikedByUser(String uid) {
+    return likerUIDs.contains(uid);
+  }
+
+  static Status populateFromMap(Map m) {
+    String status = m["text"];
+    Status temp = new Status (status: status);
+
+    if (m["likes"] == null) {
+      temp.setLikerUIDs({});
+      return temp;
+    }
+
+    Map likeMap = Map<String, int>.from(m["likes"]);
+    List<String> likerUIDs = List<String>.from(likeMap.keys);
+    temp.setLikerUIDs(likerUIDs.toSet());
+
+    return temp;
   }
 }

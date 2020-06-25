@@ -31,11 +31,10 @@ class SponsoredDown {
   String organizationID;
   Organization organization;
 
-
-
   String getCleanTime() {
     String minute = this.time.minute.toString();
-    String hour = (this.time.hour % 12) == 0 ? "12" : (this.time.hour % 12).toString();
+    String hour =
+        (this.time.hour % 12) == 0 ? "12" : (this.time.hour % 12).toString();
     // Would need changed if we abandoned the 24-hour approach
     String todayOrTom =
         this.time.day == DateTime.now().day ? "Today" : "Tomorrow";
@@ -51,8 +50,16 @@ class SponsoredDown {
     return todayOrTom + "  " + hour + ":" + minute + " " + amPm;
   }
 
+  Future<void> populateOrganization() async {
+    DataSnapshot orgData = await FirebaseDatabase.instance
+        .reference()
+        .child("sponsored/organizations/${this.organizationID}")
+        .once();
+    Organization creatorOrg = Organization.populateFromDataSnapshot(orgData);
+    this.organization = creatorOrg;
+  }
 
-  static SponsoredDown populateDown(DataSnapshot ds) {
+  static Future<SponsoredDown> populateDown(DataSnapshot ds) async {
     Map entry = ds.value;
     SponsoredDown temp = new SponsoredDown();
 
@@ -65,6 +72,8 @@ class SponsoredDown {
     temp.time = DateTime.parse(entry["time"]);
     temp.timeCreated = DateTime.parse(entry["timeCreated"]);
     temp.organizationID = entry["organization"];
+
+    await temp.populateOrganization();
 
     return temp;
   }

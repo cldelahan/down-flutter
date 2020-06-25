@@ -37,6 +37,7 @@ class ImportContactsPage extends StatefulWidget {
 class _ImportContactsPageState extends State<ImportContactsPage> {
   FirebaseUser user;
   List<User> contactsToImport;
+  List<bool> importContact;
   DatabaseReference dbUsers;
   DatabaseReference dbCurrentUser;
 
@@ -62,19 +63,19 @@ class _ImportContactsPageState extends State<ImportContactsPage> {
       TODO: ... their own account, would they perfer to "start from scratch"
      */
 
-    for (User i in contactsToImport) {
-      if (i.invite == false || i.phoneNumber == "") {
+    for (int i = 0; i < contactsToImport.length; i++) {
+      if (importContact[i] == false || contactsToImport[i].phoneNumber == "") {
         continue;
       } else {
         // add to firebase
         // create a new child in user
         var newChild = dbUsers.push();
         newChild.set({
-          'phone' : i.phoneNumber,
+          'phone' : contactsToImport[i].phoneNumber,
           'addedByPhone' : true,
         });
         newChild.child("aliases").update(
-            {user.uid : i.profileName});
+            {user.uid : contactsToImport[i].profileName});
 
         // need to add them as a friend of the original user
         dbCurrentUser.child("friends").update({
@@ -99,10 +100,10 @@ class _ImportContactsPageState extends State<ImportContactsPage> {
                 controlAffinity: ListTileControlAffinity.leading,
                 onChanged: (bool newValue) {
                   setState(() {
-                    this.contactsToImport[index].invite = newValue;
+                    this.importContact[index] = newValue;
                   });
                 },
-                value: this.contactsToImport[index].invite,
+                value: this.importContact[index],
                 title: Text(this.contactsToImport[index].profileName),
                 subtitle: Text(this.contactsToImport[index].phoneNumber),
               );
@@ -129,7 +130,7 @@ class _ImportContactsPageState extends State<ImportContactsPage> {
               color: Theme.of(context).primaryColor,
               onPressed: () {
                 for (int i = 0; i < this.contactsToImport.length; i++) {
-                  this.contactsToImport[i].invite = true;
+                  this.importContact[i] = true;
                 }
                 setState(() {});
               }),
@@ -139,7 +140,7 @@ class _ImportContactsPageState extends State<ImportContactsPage> {
               color: Theme.of(context).primaryColor,
               onPressed: () {
                 for (int i = 0; i < this.contactsToImport.length; i++) {
-                  this.contactsToImport[i].invite = false;
+                  this.importContact[i] = false;
                 }
                 setState(() {});
               })

@@ -58,7 +58,7 @@ class _ManageGroupPageState extends State<ManageGroupPage> {
 
   _onFriendAdded(Event event) async {
     DataSnapshot friendInfo = await dbAllUsers.child(event.snapshot.key).once();
-    User temp = User.populateFromDataSnapshot(friendInfo, user);
+    User temp = User.populateFromDataSnapshotAndPhone(friendInfo, user);
     setState(() {
       _friends.add(temp);
     });

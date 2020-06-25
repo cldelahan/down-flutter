@@ -3,44 +3,34 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_image/firebase_image.dart';
 
-// template class to model a user
-// allows for better importing into Firebase
+
 class User {
   String id;
-  String profileName = "";
-  String username;
+  String profileName;
   String url;
   String email;
   String token;
   String phoneNumber;
+
+  // other interesting values
+
+  bool addedByPhone;
+  /*
   bool addedByPhone = false;
   bool invite = false;
-  bool isDown = false;
+  bool isDown = false;*/
   ImageProvider profileImage = null;
+  bool invite = false;
 
   User({
-    this.id,
-    this.profileName,
-    // TODO: Do we want to distinguish between these two?
-    this.username,
-    this.url,
-    this.email,
-    this.token,
-    this.addedByPhone,
-  }) {
-    id = "";
-    profileName = "";
-    username = "";
-    url = "";
-    email = "";
-    token = "";
-    phoneNumber = "";
-    invite = false;
-    isDown = false;
-    profileImage = null;
-    addedByPhone = false;
-
-  }
+    this.id = "",
+    this.profileName = "",
+    this.url = "",
+    this.email= "",
+    this.token = "",
+    this.phoneNumber = "",
+    this.addedByPhone = false
+  });
 
   void cleanAndAddPhoneNumber(String number) {
     number = number.replaceAll("(", "");
@@ -65,6 +55,17 @@ class User {
     this.phoneNumber = number;
   }
 
+  String getInitials() {
+    String temp = this.profileName.trim();
+    int indexOfSpace = temp.indexOf(" ");
+    String outputString = temp.substring(0, 1);
+    if (indexOfSpace < 0) {
+      return outputString;
+    }
+    outputString += temp.substring(indexOfSpace + 1, indexOfSpace + 2);
+    print(outputString);
+    return outputString;
+  }
 
   /*
     Here we load the image depending on what type of user we have and how
@@ -72,7 +73,6 @@ class User {
     a more general representation) so we can return it
    */
   ImageProvider getImageOfUser() {
-
     if (profileImage == null) {
       if (this.addedByPhone) {
         profileImage = AssetImage('assets/images/phoneIcon.png');
@@ -86,16 +86,28 @@ class User {
     return profileImage;
   }
 
+
+  static User populateFromDataSnapshot(DataSnapshot ds) {
+    Map entry = ds.value;
+    User temp = User(
+      id: ds.key,
+      profileName: entry["profileName"],
+      url: entry["url"],
+      email: entry["email"],
+      addedByPhone: false
+    );
+
+    return temp;
+  }
   /*
     Presently - in the case it is user addedByPhone, we must know
     which user we are talking about so we can retrieve his / her alias
    */
-  static User populateFromDataSnapshot(DataSnapshot ds, FirebaseUser user) {
+  static User populateFromDataSnapshotAndPhone(DataSnapshot ds, FirebaseUser user) {
     Map entry = ds.value;
 
     User temp = new User();
 
-    temp.isDown = false;
 
     // fill out standard fields of the user
     try {
@@ -110,6 +122,7 @@ class User {
       temp.addedByPhone = true;
       // in this case, their name takes a different structure
       temp.profileName = entry['aliases'][user.uid];
+      temp.url = "";
     }
 
 
@@ -119,6 +132,15 @@ class User {
       temp.url = entry['url'];
       temp.email = entry['email'];
       temp.addedByPhone = false;
+
+      /*
+    // they were added by phone
+    if (entry['addedByPhone'] != null && entry['addedByPhone'] == true) {
+      temp.addedByPhone = true;
+      // in this case, their name takes a different structure
+      temp.profileName = entry['aliases'][user.uid];
+    }*/
+
     }
 
     // TODO: should we load the image here or save for when we display?

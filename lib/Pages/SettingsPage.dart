@@ -60,7 +60,7 @@ class _SettingsPageState extends State<SettingsPage> {
     print("Pre settings page");
     print("Settings page: " + event.snapshot.value.toString());
     print("SETTINGS PAGE: " + event.snapshot.key.toString());
-    User temp = User.populateFromDataSnapshot(event.snapshot, user);
+    User temp = User.populateFromDataSnapshotAndPhone(event.snapshot, user);
     this.currentUser = temp;
     print(this.currentUser.email);
 
