@@ -18,11 +18,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+
 import 'package:down/Models/User.dart';
-import 'package:firebase_image/firebase_image.dart';
 import 'package:down/Models/Group.dart';
 import 'package:down/Pages/AddFriendPage.dart';
-import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:down/Pages/ManageGroupPage.dart';
 
 class FriendGroupPage extends StatefulWidget {
@@ -56,14 +56,12 @@ class _FriendGroupPageState extends State<FriendGroupPage>
     friends.clear();
     groups.clear();
     requests.clear();
-    print("Initializing state");
+
     dbAllUsers = FirebaseDatabase.instance.reference().child("users");
     dbFriends = FirebaseDatabase.instance
         .reference()
         .child("users/${user.uid}/friends");
     dbFriends.onChildAdded.listen(_onFriendAdded);
-
-    print(user.uid);
 
     dbGroups =
         FirebaseDatabase.instance.reference().child("users/${user.uid}/groups");
@@ -80,8 +78,6 @@ class _FriendGroupPageState extends State<FriendGroupPage>
     setState(() {
       friends.add(User.populateFromDataSnapshotAndPhone(friendInfo, user));
     });
-    print("Added user");
-    print(friendInfo.toString());
   }
 
   _onGroupAdded(Event event) async {

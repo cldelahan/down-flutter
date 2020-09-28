@@ -65,7 +65,7 @@ class _FeedPageState extends State<FeedPage>
   DatabaseReference dbAllSponsoredDowns;
   DatabaseReference dbUserSubscriptions;
 
-  bool wantKeepAlive = false;
+  bool wantKeepAlive = true;
 
   _FeedPageState(this.user);
 
@@ -96,6 +96,7 @@ class _FeedPageState extends State<FeedPage>
       // Down is too old to display - move to down-old
       FirebaseDatabase.instance
           .reference()
+          .child("users")
           .child(user.uid)
           .child("down-old")
           .update({newRecievedDown.id: 0});

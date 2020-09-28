@@ -112,7 +112,7 @@ class User {
     // fill out standard fields of the user
     try {
       temp.id = ds.key;
-      temp.email = entry["email"];
+      temp.phoneNumber = entry["phone"];
     } on Exception catch(_) {
       return null;
     }

@@ -19,15 +19,12 @@ Notes:
 
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_image/firebase_image.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:contacts_service/contacts_service.dart';
+
+
 import 'package:down/Models/User.dart';
 import 'package:down/Pages/ImportContactsPage.dart';
-import '../Pages/UploadPage.dart';
-
-// simple_permissions is giving issues
-//import 'package:simple_permissions/simple_permissions.dart';
-import 'package:contacts_service/contacts_service.dart';
 
 class SettingsPage extends StatefulWidget {
   FirebaseUser user;
@@ -41,18 +38,16 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   FirebaseUser user;
   DatabaseReference dbAllUsers;
-  User currentUser;
+  User currentUser = new User();
 
-  _SettingsPageState(this.user) {
-    print("PRINTING USER: " + this.user.uid);
-  }
+  _SettingsPageState(this.user);
 
   @override
   void initState() {
     super.initState();
     dbAllUsers =
         FirebaseDatabase.instance.reference().child("users/${this.user.uid}");
-
+    print("Setting listener");
     dbAllUsers.onValue.listen(_getUserData);
   }
 

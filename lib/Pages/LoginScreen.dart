@@ -12,9 +12,10 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
+import 'package:flutter/material.dart';
+
 import 'package:down/Pages/HomePage.dart';
 import 'package:down/Pages/UserInfoPage.dart';
-import 'package:flutter/material.dart';
 
 class LoginScreen extends StatelessWidget {
   final _phoneController = TextEditingController();
@@ -191,7 +192,7 @@ class LoginScreen extends StatelessWidget {
     if (bypass) {
       return UserInfoPage();
     }
-    _autoSignin(context);
+    //_autoSignin(context);
     return Scaffold(
       body: SingleChildScrollView(
         child: Padding(

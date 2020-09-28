@@ -14,14 +14,12 @@ Notes:
 
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_image/firebase_image.dart';
 import 'package:firebase_database/firebase_database.dart';
+
 import 'package:down/Models/User.dart';
-import '../Pages/UploadPage.dart';
 
 // simple_permissions is giving issues
 //import 'package:simple_permissions/simple_permissions.dart';
-import 'package:contacts_service/contacts_service.dart';
 
 class ImportContactsPage extends StatefulWidget {
   final FirebaseUser user;
@@ -36,12 +34,18 @@ class ImportContactsPage extends StatefulWidget {
 
 class _ImportContactsPageState extends State<ImportContactsPage> {
   FirebaseUser user;
-  List<User> contactsToImport;
-  List<bool> importContact;
+  List<User> contactsToImport = [];
+  List<bool> importContact = [];
+  Map allUserMap;
+
   DatabaseReference dbUsers;
   DatabaseReference dbCurrentUser;
 
-  _ImportContactsPageState(this.user, this.contactsToImport);
+  _ImportContactsPageState(this.user, this.contactsToImport) {
+    for (User i in contactsToImport) {
+      importContact.add(false);
+    }
+  }
 
   @override
   void initState() {
@@ -49,9 +53,19 @@ class _ImportContactsPageState extends State<ImportContactsPage> {
     dbUsers = FirebaseDatabase.instance.reference().child('users');
     dbCurrentUser =
         FirebaseDatabase.instance.reference().child('users/${user.uid}');
+
+    // To check if the added contact already exists, we read in the entire
+    // user page. This is extremely inefficient and horrible.
+    dbUsers.onValue.listen(_getAllUsers);
   }
 
-  void _importContactsToFirebase() {
+  void _getAllUsers(Event event) {
+    // storing all users for our horrible search below
+    DataSnapshot userDS = event.snapshot;
+    allUserMap = userDS.value;
+  }
+
+  void _importContactsToFirebase() async {
     /*
       Here we do a pretty complicated surgery to accomplish 3 things
       1) Create a user account for each friend added
@@ -59,32 +73,65 @@ class _ImportContactsPageState extends State<ImportContactsPage> {
       2) Denote that this new use account is a "phone-added" account
         a) Is it better to do this instead of adding phone avatar?
       3) Add the new user account as a friend to the original
-      TODO: Should we give fake users friends? Or when they finally do create
-      TODO: ... their own account, would they perfer to "start from scratch"
      */
 
     for (int i = 0; i < contactsToImport.length; i++) {
       if (importContact[i] == false || contactsToImport[i].phoneNumber == "") {
         continue;
       } else {
-        // add to firebase
-        // create a new child in user
-        var newChild = dbUsers.push();
-        newChild.set({
-          'phone' : contactsToImport[i].phoneNumber,
-          'addedByPhone' : true,
-        });
-        newChild.child("aliases").update(
-            {user.uid : contactsToImport[i].profileName});
-
-        // need to add them as a friend of the original user
-        dbCurrentUser.child("friends").update({
-          newChild.key: 0
-        });
-
-        print("New user sucessfully added at: ");
-        print(newChild.key);
-
+        String uid =
+            _findIfAddedAccountExistsWithPhone(contactsToImport[i].phoneNumber);
+        /*
+          Three cases:
+          1) Null, meaning no account and create a new one
+          2) Is a UID, meaning on UID add our new alias and change nothing else
+          3) Is a UID, but the user has an actual Down account, and thus should
+            be added
+            TODO: We should make sure the user knows a friend request was sent
+            TODO: ... (so they don't just see no change).
+         */
+        if (uid == null) {
+          // Case 1
+          print("Case 1");
+          var newChild = dbUsers.push();
+          newChild.set({
+            'phone': contactsToImport[i].phoneNumber,
+            'addedByPhone': true,
+          });
+          newChild
+              .child("aliases")
+              .update({user.uid: contactsToImport[i].profileName});
+          // need to add them as a friend of the original user
+          dbCurrentUser.child("friends").update({newChild.key: 0});
+          print("New user sucessfully added at: ");
+          print(newChild.key);
+        } else {
+          print(uid);
+          // If the user already has an account (this could be shortened by
+          // ... noting if uid starts with '-' it is a result of .push()
+          if (allUserMap[uid]["addedByPhone"] != null &&
+              allUserMap[uid]["addedByPhone"] == true) {
+            // Case 2
+            print("Case 2");
+            dbUsers
+                .child(uid)
+                .child("aliases")
+                .update({this.user.uid: contactsToImport[i].profileName});
+            dbCurrentUser.child("friends").update({uid: 0});
+          } else {
+            print("Case 3");
+            // Case 3, send friend request
+            // (unless they are already friends)
+            if (allUserMap[this.user.uid]['friends'] != null &&
+                allUserMap[this.user.uid]['friends'][uid] != null) {
+              // they are already friends
+              print("Case 3 - already friends. No change.");
+            } else {
+              print("Case 3 - sending request to new friends");
+              dbUsers.child(uid).child("requests").update({this.user.uid: 0});
+            }
+          }
+        }
       }
     }
   }
@@ -161,6 +208,34 @@ class _ImportContactsPageState extends State<ImportContactsPage> {
                 // make the call to firebase to store all friends
               }),
         ]);
+  }
+
+  String _findIfAddedAccountExistsWithPhone(String pn) {
+    /*
+      Purpose: If another user has added this person by phone,
+      we only want one copy of that user (with another 
+      alias added).
+      Returns UID of user, and null if no user exists.
+      
+      This function is presently terribly inefficient.
+      I cannot figure out how to constant-time query
+      Firebase RealTimeDatabase. So we are linearly searching the
+      entire database.
+
+      TODO: We could slightly optimize this by noting all uids added
+      TODO: ... by .push() start with '-'
+      TODO: Make this less horrible
+     */
+    List<String> allUserUIDs = List<String>.from(allUserMap.keys);
+    for (String uid in allUserUIDs) {
+      // If this is the correct user
+      if (allUserMap[uid]["phone"] == pn) {
+        // If this user was added by phone, we return UID so we don't create
+        // ... duplicates.
+        return uid;
+      }
+    }
+    return null;
   }
 
   @override
