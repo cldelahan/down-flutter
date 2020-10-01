@@ -65,7 +65,7 @@ class _FeedPageState extends State<FeedPage>
   DatabaseReference dbAllSponsoredDowns;
   DatabaseReference dbUserSubscriptions;
 
-  bool wantKeepAlive = true;
+  bool wantKeepAlive = false;
 
   _FeedPageState(this.user);
 

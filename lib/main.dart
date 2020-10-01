@@ -22,6 +22,7 @@ class MyApp extends StatelessWidget {
       title: 'Down',
       theme: ThemeData(
         primaryColor: Color(0xff10c260),
+        secondaryHeaderColor: Color(0x4410c260),
         buttonColor: Color(0xff3a82b8),
         backgroundColor: Color(0xfff0ecf1),
         accentColor: Color(0x22546a65),

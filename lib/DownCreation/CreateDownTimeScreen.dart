@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:down/Models/Down.dart';
 import 'package:down/DownCreation/CreateDownInviteScreen.dart';
+import 'package:flutter_time_picker_spinner/flutter_time_picker_spinner.dart';
 import 'package:firebase_database/firebase_database.dart';
 
 // For changing the language
@@ -24,6 +25,7 @@ class CreateDownTimeScreen extends StatefulWidget {
 class _CreateDownTimeScreenState extends State<CreateDownTimeScreen> {
   FirebaseUser user;
   Down _builtDown;
+  Duration _duration = Duration();
 
   _CreateDownTimeScreenState(this.user, this._builtDown);
 
@@ -34,12 +36,30 @@ class _CreateDownTimeScreenState extends State<CreateDownTimeScreen> {
     return new Container(
         color: Colors.white,
         padding: EdgeInsets.all(16.0),
-        child: new ListView(
-            shrinkWrap: true, children: <Widget>[
-              showPageIntro(),
-              new Material(child:
-              basicTimeField()),
-        ]));
+        child: new GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onVerticalDragStart: (DragStartDetails d) {
+              Navigator.of(context).push(_createRoute());
+            },
+            child: Center(
+              child: new GestureDetector(
+                  onVerticalDragUpdate: (_) {},
+                  child: TimePickerSpinner(
+                  is24HourMode: false,
+                  isForce2Digits: true,
+                  spacing: 50,
+                  normalTextStyle: TextStyle(
+                      fontSize: 30,
+                      color: Theme.of(context).secondaryHeaderColor),
+                  highlightedTextStyle: TextStyle(
+                      fontSize: 32, color: Theme.of(context).primaryColor),
+                  onTimeChange: (time) {
+                    setState(() {
+                      _builtDown.time = time;
+                      _builtDown.timeCreated = DateTime.now();
+                    });
+                  }),
+            ))));
   }
 
   Widget showPageIntro() {
@@ -75,7 +95,7 @@ class _CreateDownTimeScreenState extends State<CreateDownTimeScreen> {
           if (temp.hour > DateTime.now().hour) {
             // is today
             downTime = new DateTime(DateTime.now().year, DateTime.now().month,
-            DateTime.now().day, temp.hour, temp.minute, 0);
+                DateTime.now().day, temp.hour, temp.minute, 0);
           } else {
             // is tomorrow
             downTime = new DateTime(DateTime.now().year, DateTime.now().month,
@@ -92,27 +112,23 @@ class _CreateDownTimeScreenState extends State<CreateDownTimeScreen> {
     ]);
   }
 
-    Route _createRoute() {
-      return PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) =>
-            CreateDownInviteScreen(this.user, this._builtDown),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          // a "tween" allows us to create an animation between the two pages
-          var begin = Offset(0.0, 1.0);
-          var end = Offset.zero;
-          var curve = Curves.ease;
-          // this tween defined the movement between the two pages plus the
-          // sigmoid curve effect
-          var tween = Tween(begin: begin, end: end).chain(
-              CurveTween(curve: curve));
+  Route _createRoute() {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) =>
+          CreateDownInviteScreen(this.user, this._builtDown),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        // a "tween" allows us to create an animation between the two pages
+        var begin = Offset(0.0, 1.0);
+        var end = Offset.zero;
+        var curve = Curves.ease;
+        // this tween defined the movement between the two pages plus the
+        // sigmoid curve effect
+        var tween =
+            Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
 
-          var offsetAnimation = animation.drive(tween);
-          return SlideTransition(
-              position: offsetAnimation,
-              child: child
-          );
-        },
-      );
-    }
+        var offsetAnimation = animation.drive(tween);
+        return SlideTransition(position: offsetAnimation, child: child);
+      },
+    );
   }
-
+}
