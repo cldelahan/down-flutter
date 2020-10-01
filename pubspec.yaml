@@ -47,6 +47,8 @@ dependencies:
   firebase_image: ^0.1.6
   flutter_speed_dial: ^1.2.5
   contacts_service: ^0.4.6
+  # flutter_duration_picker: ^1.0.0
+  flutter_time_picker_spinner:
   #simple_permissions: ^0.1.9
 
 dev_dependencies:
